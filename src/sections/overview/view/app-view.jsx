@@ -189,12 +189,12 @@ export default function AppView() {
             title="Traffic by Site"
             list={[
               {
-                name: 'FaceBook',
+                name: 'KFUPM Expo',
                 value: 323234,
                 icon: <Iconify icon="eva:facebook-fill" color="#1877F2" width={32} />,
               },
               {
-                name: 'Google',
+                name: 'Riyadh boulevard',
                 value: 341212,
                 icon: <Iconify icon="eva:google-fill" color="#DF3E30" width={32} />,
               },
