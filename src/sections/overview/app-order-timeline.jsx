@@ -1,5 +1,7 @@
-import PropTypes from 'prop-types';
+// AppOrderTimeline.js
 
+import React from 'react';
+import PropTypes from 'prop-types';
 import Card from '@mui/material/Card';
 import Timeline from '@mui/lab/Timeline';
 import TimelineDot from '@mui/lab/TimelineDot';
@@ -8,17 +10,45 @@ import CardHeader from '@mui/material/CardHeader';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
-import TimelineItem, { timelineItemClasses } from '@mui/lab/TimelineItem';
+import TimelineItem, { timelineItemClasses } from '@mui/lab/TimelineItem'; // Import timelineItemClasses
 
-import { fDateTime } from 'src/utils/format-time';
+import { fDateTime } from 'src/utils/format-time'; // Ensure the path to this utility function is correct
 
-// ----------------------------------------------------------------------
 
-export default function AnalyticsOrderTimeline({ title, subheader, list, ...other }) {
+const cardStyle = {
+  ...other.style,
+  height: 'auto', // This can be a specific value or 'auto' for natural height
+  overflow: 'auto' // Add a scrollbar if content overflows
+};
+function OrderItem({ item, lastTimeline }) {
+  const { title, status, time } = item;
+  const type = status === 'Started' ? 'success' : 'error';
+
   return (
-    <Card {...other}>
-      <CardHeader title={title} subheader={subheader} />
+    <TimelineItem>
+      <TimelineSeparator>
+        <TimelineDot color={type} />
+        {!lastTimeline && <TimelineConnector />}
+      </TimelineSeparator>
+      <TimelineContent>
+        <Typography variant="subtitle2">{title}</Typography>
+        <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+          {fDateTime(time)}
+        </Typography>
+      </TimelineContent>
+    </TimelineItem>
+  );
+}
 
+OrderItem.propTypes = {
+  item: PropTypes.object.isRequired,
+  lastTimeline: PropTypes.bool,
+};
+
+export default function AppOrderTimeline({ title, subheader, eventsTimeline, ...other }) {
+  return (
+    <Card style={cardStyle} {...other}>
+      <CardHeader title={title} subheader={subheader} />
       <Timeline
         sx={{
           m: 0,
@@ -29,51 +59,16 @@ export default function AnalyticsOrderTimeline({ title, subheader, list, ...othe
           },
         }}
       >
-        {list.map((item, index) => (
-          <OrderItem key={item.id} item={item} lastTimeline={index === list.length - 1} />
+        {eventsTimeline.map((item, index) => (
+          <OrderItem key={item.id} item={item} lastTimeline={index === eventsTimeline.length - 1} />
         ))}
       </Timeline>
     </Card>
   );
 }
 
-AnalyticsOrderTimeline.propTypes = {
-  list: PropTypes.array,
+AppOrderTimeline.propTypes = {
+  eventsTimeline: PropTypes.array.isRequired,
   subheader: PropTypes.string,
   title: PropTypes.string,
-};
-
-// ----------------------------------------------------------------------
-
-function OrderItem({ item, lastTimeline }) {
-  const { type, title, time } = item;
-  return (
-    <TimelineItem>
-      <TimelineSeparator>
-        <TimelineDot
-          color={
-            (type === 'order1' && 'primary') ||
-            (type === 'order2' && 'success') ||
-            (type === 'order3' && 'info') ||
-            (type === 'order4' && 'warning') ||
-            'error'
-          }
-        />
-        {lastTimeline ? null : <TimelineConnector />}
-      </TimelineSeparator>
-
-      <TimelineContent>
-        <Typography variant="subtitle2">{title}</Typography>
-
-        <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-          {fDateTime(time)}
-        </Typography>
-      </TimelineContent>
-    </TimelineItem>
-  );
-}
-
-OrderItem.propTypes = {
-  item: PropTypes.object,
-  lastTimeline: PropTypes.bool,
 };

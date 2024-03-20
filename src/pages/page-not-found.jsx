@@ -1,17 +1,17 @@
 import { Helmet } from 'react-helmet-async';
 
-import { UserView } from 'src/sections/user/view';
+import { NotFoundView } from 'src/sections/error';
 
 // ----------------------------------------------------------------------
 
-export default function UserPage() {
+export default function NotFoundPage() {
   return (
     <>
       <Helmet>
-        <title> User | CITRA Dashboard </title>
+        <title> 404 Page Not Found </title>
       </Helmet>
 
-      <UserView />
+      <NotFoundView />
     </>
   );
 }
