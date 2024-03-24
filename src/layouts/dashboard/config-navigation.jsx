@@ -17,6 +17,11 @@ const navConfig = [
     path: '/user',
     icon: icon('ic_user'),
   },
+  {
+    title: 'event',
+    path: '/event',
+    icon: icon('ic_event'),
+  },
 
 ];
 

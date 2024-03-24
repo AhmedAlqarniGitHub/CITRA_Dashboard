@@ -309,7 +309,7 @@
 
 "@iconify/react@^4.1.1":
   version "4.1.1"
-  resolved "https://registry.npmjs.org/@iconify/react/-/react-4.1.1.tgz"
+  resolved "https://registry.yarnpkg.com/@iconify/react/-/react-4.1.1.tgz#da1bf03cdca9427f07cf22cf5b63fa8f02db4722"
   integrity sha512-jed14EjvKjee8mc0eoscGxlg7mSQRkwQG3iX3cPBCO7UlOjz0DtlvTqxqEcHUJGh+z1VJ31Yhu5B9PxfO0zbdg==
   dependencies:
     "@iconify/types" "^2.0.0"
