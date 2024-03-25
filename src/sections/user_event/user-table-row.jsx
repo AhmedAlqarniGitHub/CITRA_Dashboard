@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Stack from '@mui/material/Stack';
@@ -10,11 +10,10 @@ import MenuItem from '@mui/material/MenuItem';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField'; // Added for inline editing
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
-
-// ----------------------------------------------------------------------
 
 export default function UserTableRow({
   selected,
@@ -27,6 +26,8 @@ export default function UserTableRow({
   handleClick,
 }) {
   const [open, setOpen] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedName, setEditedName] = useState(name);
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -34,6 +35,21 @@ export default function UserTableRow({
 
   const handleCloseMenu = () => {
     setOpen(null);
+  };
+
+  const handleEdit = () => {
+    setIsEditMode(true);
+    handleCloseMenu();
+  };
+
+  const handleSave = () => {
+    console.log('Edited name:', editedName);
+    setIsEditMode(false);
+    // Here you would typically update the state or make an API call to save the changes
+  };
+
+  const handleNameChange = (event) => {
+    setEditedName(event.target.value);
   };
 
   return (
@@ -46,18 +62,23 @@ export default function UserTableRow({
         <TableCell component="th" scope="row" padding="none">
           <Stack direction="row" alignItems="center" spacing={2}>
             <Avatar alt={name} src={avatarUrl} />
-            <Typography variant="subtitle2" noWrap>
-              {name}
-            </Typography>
+            {isEditMode ? (
+              <TextField
+                value={editedName}
+                onChange={handleNameChange}
+                size="small"
+              />
+            ) : (
+              <Typography variant="subtitle2" noWrap>
+                {name}
+              </Typography>
+            )}
           </Stack>
         </TableCell>
 
         <TableCell>{eventName}</TableCell>
-
         <TableCell>{role}</TableCell>
-
         <TableCell align="center">{isVerified ? 'Yes' : 'No'}</TableCell>
-
         <TableCell>
           <Label color={(status === 'inactive' && 'error') || 'success'}>{status}</Label>
         </TableCell>
@@ -66,29 +87,33 @@ export default function UserTableRow({
           <IconButton onClick={handleOpenMenu}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
+          <Popover
+            open={!!open}
+            anchorEl={open}
+            onClose={handleCloseMenu}
+            anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            PaperProps={{
+              sx: { width: 140 },
+            }}
+          >
+            <MenuItem onClick={handleEdit}>
+              <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
+              Edit
+            </MenuItem>
+            {isEditMode && (
+              <MenuItem onClick={handleSave}>
+                <Iconify icon="eva:checkmark-outline" sx={{ mr: 2 }} />
+                Save
+              </MenuItem>
+            )}
+            <MenuItem onClick={handleCloseMenu} sx={{ color: 'error.main' }}>
+              <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
+              Delete
+            </MenuItem>
+          </Popover>
         </TableCell>
       </TableRow>
-
-      <Popover
-        open={!!open}
-        anchorEl={open}
-        onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: { width: 140 },
-        }}
-      >
-        <MenuItem onClick={handleCloseMenu}>
-          <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
-          Edit
-        </MenuItem>
-
-        <MenuItem onClick={handleCloseMenu} sx={{ color: 'error.main' }}>
-          <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
-          Delete
-        </MenuItem>
-      </Popover>
     </>
   );
 }
