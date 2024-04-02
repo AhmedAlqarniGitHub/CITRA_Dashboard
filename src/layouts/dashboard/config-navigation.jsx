@@ -22,6 +22,11 @@ const navConfig = [
     path: '/event',
     icon: icon('ic_event'),
   },
+  {
+    title: 'camera',
+    path: '/camera',
+    icon: icon('ic_event'),
+  },
 
 ];
 

@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import { UserView } from 'src/sections/user/view';
+import { CameraView } from 'src/sections/camera/view';
 
 // ----------------------------------------------------------------------
 
@@ -11,7 +11,7 @@ export default function UserPage() {
         <title> User | CITRA Dashboard </title>
       </Helmet>
 
-      <UserView />
+      <CameraView />
     </>
   );
 }

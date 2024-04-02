@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import { EventView } from 'src/sections/user_event/view'; // Make sure your import path matches your project structure
+import { EventView } from 'src/sections/event/view'; // Make sure your import path matches your project structure
 
 // ----------------------------------------------------------------------
 
