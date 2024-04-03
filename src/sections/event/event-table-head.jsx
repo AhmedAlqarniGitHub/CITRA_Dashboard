@@ -1,7 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TableHead, TableRow, TableCell, Checkbox, TableSortLabel, Box } from '@mui/material';
+import {
+  TableHead,
+  TableRow,
+  TableCell,
+  Checkbox,
+  TableSortLabel,
+  Box,
+  IconButton,
+} from '@mui/material';
 import { visuallyHidden } from './utils'; // Ensure this utility is correctly imported or defined
+import Iconify from 'src/components/iconify';
 
 export default function EventTableHead({
   order,
@@ -48,6 +57,11 @@ export default function EventTableHead({
             </TableSortLabel>
           </TableCell>
         ))}
+        <TableCell>
+          <IconButton disabled>
+            <Iconify icon="eva:more-vertical-fill" width="24" height="24" />
+          </IconButton>
+        </TableCell>
       </TableRow>
     </TableHead>
   );

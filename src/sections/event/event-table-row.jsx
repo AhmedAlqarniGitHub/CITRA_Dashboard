@@ -8,14 +8,23 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button
 } from '@mui/material';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
+import axios from 'axios';
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function EventTableRow({
   id,
-  eventName,
   eventId,
+  organizer,
+  eventName,
   description,
   startDate,
   endDate,
@@ -23,15 +32,17 @@ export default function EventTableRow({
   location,
   selected,
   handleClick,
+  refreshEventList
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedEvent, setEditedEvent] = useState({
     eventName,
     description,
-    startDate,
-    endDate,
+    startDate: startDate.split('T')[0], // Adjusting date format for picker
+    endDate: endDate.split('T')[0], // Adjusting date format for picker
     location,
+    organizer,
   });
 
   const open = Boolean(anchorEl);
@@ -45,6 +56,14 @@ export default function EventTableRow({
   };
 
   const handleEdit = () => {
+    setEditedEvent({
+      eventName,
+      description,
+      startDate: startDate.split('T')[0], // Adjusting date format for picker
+      endDate: endDate.split('T')[0], // Adjusting date format for picker
+      location,
+      organizer,
+    });
     setIsEditMode(true);
     handleMenuClose();
   };
@@ -57,24 +76,67 @@ export default function EventTableRow({
       startDate,
       endDate,
       location,
+      organizer,
     });
   };
 
   const handleChange = (prop) => (event) => {
     setEditedEvent({ ...editedEvent, [prop]: event.target.value });
   };
+  
 
-  const handleSave = () => {
-    // Implement save logic here
-    console.log('Save edited data:', editedEvent);
-    setIsEditMode(false);
+const handleSave = async () => {
+  // Add 'organizer' to the editedEvent state if it needs to be editable
+  const eventToUpdate = {
+    name: editedEvent.eventName,
+    description: editedEvent.description,
+    startingDate: new Date(editedEvent.startDate).toISOString(),
+    endingDate: new Date(editedEvent.endDate).toISOString(),
+    location: editedEvent.location,
+    organizer: editedEvent.organizer,
   };
 
-  const handleDelete = () => {
-    // Implement delete logic here
-    console.log('Delete:', id);
+  try {
+    const response = await axios.patch(`${apiBaseUrl}/events/update/${id}`, eventToUpdate);
+    console.log('Save edited data:', response.data);
+    refreshEventList();
+    setIsEditMode(false);
+  } catch (error) {
+    console.error('Error saving edited data:', error);
+    // Show validation errors to the user
+    if (error.response && error.response.data.errors) {
+      error.response.data.errors.forEach((err) => {
+        // Display these errors to the user
+        console.error(err.message);
+      });
+    }
+  }
+};
+
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
     handleMenuClose();
   };
+
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(`${apiBaseUrl}/events/${id}`);
+      console.log('Delete response:', response.data);
+      refreshEventList();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      // Show error to the user if necessary
+    }
+    setDeleteDialogOpen(false);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+  };
+
 
   return (
     <TableRow hover tabIndex={-1} selected={selected}>
@@ -147,7 +209,7 @@ export default function EventTableRow({
 
       {/* Status is not editable */}
       <TableCell>
-        <Label color={(status === 'Active' ? 'success' : 'error')}>{status}</Label>
+        <Label color={status === 'Active' ? 'success' : 'error'}>{status}</Label>
       </TableCell>
 
       {/* Action buttons */}
@@ -166,16 +228,12 @@ export default function EventTableRow({
             <IconButton onClick={handleMenuOpen}>
               <Iconify icon="eva:more-vertical-fill" width="24" height="24" />
             </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleMenuClose}
-            >
+            <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
               <MenuItem onClick={handleEdit}>
                 <Iconify icon="eva:edit-fill" width="24" height="24" />
                 Edit
               </MenuItem>
-              <MenuItem onClick={handleDelete}>
+              <MenuItem onClick={handleDeleteClick}>
                 <Iconify icon="eva:trash-2-outline" width="24" height="24" />
                 Delete
               </MenuItem>
@@ -183,6 +241,26 @@ export default function EventTableRow({
           </>
         )}
       </TableCell>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{'Confirm Delete'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this event?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+          <Button onClick={handleDelete} color="primary" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </TableRow>
   );
 }
@@ -198,4 +276,5 @@ EventTableRow.propTypes = {
   location: PropTypes.string,
   selected: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
+  refreshEventList: PropTypes.func.isRequired,
 };

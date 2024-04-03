@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import events from 'src/_mock/events'; // Adjust this path if necessary
-
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -10,12 +9,6 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import EventTableHead from '../event-table-head';
@@ -23,15 +16,49 @@ import EventTableRow from '../event-table-row';
 import EventTableToolbar from '../event-table-toolbar';
 import TableNoData from '../table-no-data';
 import TableEmptyRows from '../table-empty-rows';
-import { emptyRows, applyFilter, getComparator } from '../utils_event';
+import { applyFilter, getComparator } from '../utils_event';
+
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function EventPage() {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('asc');
   const [selected, setSelected] = useState([]);
   const [orderBy, setOrderBy] = useState('eventName');
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  useEffect(() => {
+    axios
+      .get(`${apiBaseUrl}/events/all`)
+      .then((response) => {
+        setEvents(response.data);
+        setError('');
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  // Function to refresh the event list
+  const refreshEventList = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${apiBaseUrl}/events/all`);
+      setEvents(response.data);
+      setError('');
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -40,8 +67,8 @@ export default function EventPage() {
   };
 
   const handleFilterByName = (event) => {
-    setPage(0); // Reset to the first page
-    setFilterName(event.target.value); // Update filterName with the input field value
+    setFilterName(event.target.value);
+    setPage(0);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -49,35 +76,18 @@ export default function EventPage() {
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setPage(0);
     setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = events.map((event) => event.eventName);
-      setSelected(newSelecteds);
-    } else {
-      setSelected([]);
-    }
+    setSelected(event.target.checked ? events.map((n) => n._id) : []);
   };
 
-  const handleClick = (event, id) => {
+  const handleClick = (id) => {
     const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
-    }
+    let newSelected =
+      selectedIndex === -1 ? [...selected, id] : selected.filter((selectedId) => selectedId !== id);
 
     setSelected(newSelected);
   };
@@ -88,13 +98,13 @@ export default function EventPage() {
     filterName,
   });
 
-  const notFound = !dataFiltered.length && !!filterName;
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, dataFiltered.length - page * rowsPerPage);
 
   return (
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Events</Typography>
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+        <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
           New Event
         </Button>
       </Stack>
@@ -117,52 +127,61 @@ export default function EventPage() {
                 onRequestSort={handleRequestSort}
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
-                  { id: 'eventName', label: 'Event Name', width: '20%' },
-                  { id: 'eventId', label: 'Event ID', width: '10%' },
-                  { id: 'description', label: 'Description', width: '25%' },
-                  { id: 'startDate', label: 'Start Date', width: '10%' },
-                  { id: 'endDate', label: 'End Date', width: '10%' },
-                  { id: 'status', label: 'Status', width: '10%' },
-                  { id: 'location', label: 'Location', width: '15%' },
+                  { id: 'eventId', label: 'Event ID', align: 'left' },
+                  { id: 'eventName', label: 'Event Name', align: 'left' },
+                  { id: 'description', label: 'Description', align: 'left' },
+                  { id: 'startDate', label: 'Start Date', align: 'left' },
+                  { id: 'endDate', label: 'End Date', align: 'left' },
+                  { id: 'location', label: 'Location', align: 'left' },
+                  { id: 'status', label: 'Status', align: 'left' },
                 ]}
               />
               <TableBody>
-  {dataFiltered
-    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-    .map((event) => (
-      <EventTableRow
-        key={event.id}
-        id={event.id}
-        eventName={event.eventName}
-        eventId={event.eventId} // Make sure to pass the eventId prop
-        description={event.description}
-        startDate={event.startDate}
-        endDate={event.endDate}
-        status={event.status}
-        location={event.location}
-        selected={selected.indexOf(event.id) !== -1}
-        handleClick={handleClick}
-      />
-  ))}
-    {emptyRows > 0 && (
-    <TableEmptyRows
-      height={77}
-      emptyRows={emptyRows}
-    />
-  )}
+                {loading ? (
+                  <tr>
+                    <td colSpan={6}>Loading...</td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan={6}>Error: {error}</td>
+                  </tr>
+                ) : dataFiltered.length > 0 ? (
+                  dataFiltered
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <EventTableRow
+                        key={row._id}
+                        eventName={row.name}
+                        organizer={row.organizer}
+                        eventId={row._id} // Make sure to pass the eventId prop
+                        id={row._id} // 'id' is used instead of 'eventId' to match the unified propTypes
+                        description={row.description}
+                        startDate={row.startingDate}
+                        endDate={row.endingDate}
+                        status={row.status.charAt(0).toUpperCase() + row.status.slice(1)} // Keep transforming "active" to "Active"
+                        location={row.location} // Passed only if available
+                        selected={selected.includes(row._id)}
+                        handleClick={() => handleClick(row._id)}
+                        refreshEventList={refreshEventList}
+                      />
+                    ))
+                ) : (
+                  <TableNoData query={filterName} />
+                )}
 
-</TableBody>
+                {emptyRows > 0 && <TableEmptyRows emptyRows={emptyRows} />}
+              </TableBody>
             </Table>
           </TableContainer>
         </Scrollbar>
 
         <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={dataFiltered.length}
-          page={page}
           rowsPerPage={rowsPerPage}
+          page={page}
           onPageChange={handleChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
