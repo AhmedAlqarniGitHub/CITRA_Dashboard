@@ -10,7 +10,7 @@ import AppCurrentSubject from '../app-current-subject';
 import InteractiveLineChart from '../app-line-chart';
 import AppOrderTimeline from '../app-order-timeline';
 import axios from 'axios';
-const apiBaseUrl = import.meta.env.VITE_API_URL //|| 'http://localhost:3000';
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function AppView() {
   const [chartData, setChartData] = useState({
