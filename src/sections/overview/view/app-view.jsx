@@ -1,33 +1,103 @@
-import { faker } from '@faker-js/faker';
-
+import React, { useEffect, useState } from 'react';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-
-import Iconify from 'src/components/iconify';
-
-import AppTasks from '../app-tasks';
-import BarChartComponent from '../app-bar-chart';
-import AppOrderTimeline from '../app-order-timeline';
-import AppCurrentVisits from '../app-current-visits';
-import InteractiveLineChart from '../app-line-chart';
-import AppWebsiteVisits from '../app-website-visits';
 import AppWidgetSummary from '../app-widget-summary';
-import AppTrafficBySite from '../app-traffic-by-site';
+import AppWebsiteVisits from '../app-website-visits';
+import AppCurrentVisits from '../app-current-visits';
+import BarChartComponent from '../app-bar-chart';
 import AppCurrentSubject from '../app-current-subject';
-import AppConversionRates from '../app-conversion-rates';
-import eventsTimeLine from '../../../_mock/events_timeline';
-import eventsBarChart from '../../../_mock/events_barChart';
-import completeEventData from '../../../_mock/event_barChart_cont'
-import MyLineChart from '../app-test'
-
-const events = ['KFUPM Expo', 'Innovation Expo', 'Riyadh Boulevard', 'Tech Summit'];
-const emotions = ['Happy', 'Sad', 'Disgusted', 'Surprised', 'Natural', 'Fear'];
-
-
-// ----------------------------------------------------------------------
+import InteractiveLineChart from '../app-line-chart';
+import AppOrderTimeline from '../app-order-timeline';
+import axios from 'axios';
+const apiBaseUrl = import.meta.env.VITE_API_URL //|| 'http://localhost:3000';
 
 export default function AppView() {
+  const [chartData, setChartData] = useState({
+    completeEventData: [],
+    eventsBarChart: [],
+    eventsTimeline: [],
+    totalEmotionsPerEvent: [],
+    heatmapData: {},
+    appWebsiteVisitsData: {},
+  });
+
+  const [summaryData, setSummaryData] = useState({
+    totalEvents: 0,
+    activeEvents: 0,
+    totalEmotions: 0,
+    totalCameras: 0,
+  });
+
+  useEffect(() => {
+    const fetchSummaryData = async () => {
+      try {
+        const eventSummaryResponse = await axios.get(`${apiBaseUrl}/events/summary`);
+        const cameraSummaryResponse = await axios.get(`${apiBaseUrl}/cameras/summary`);
+
+        setSummaryData({
+          totalEvents: eventSummaryResponse.data.totalEvents,
+          activeEvents: eventSummaryResponse.data.activeEvents,
+          totalEmotions: eventSummaryResponse.data.totalEmotions,
+          totalCameras: cameraSummaryResponse.data.totalCameras,
+        });
+      } catch (error) {
+        console.error('Axios error:', error.message);
+      }
+    };
+
+    const fetchChartData = async () => {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/events/charts`);
+        setChartData(response.data);
+      } catch (error) {
+        console.error('Axios error:', error.message);
+      }
+    };
+
+    fetchSummaryData();
+    fetchChartData();
+  }, []);
+
+  const {
+    completeEventData,
+    eventsBarChart,
+    eventsTimeline,
+    totalEmotionsPerEvent,
+    heatmapData,
+    appWebsiteVisitsData,
+  } = chartData;
+  // Extract event names from completeEventData
+  const events =
+    completeEventData.length > 0
+      ? Object.keys(completeEventData[0]).filter((key) => key !== 'month')
+      : [];
+
+  const emotions =
+    eventsBarChart.length > 0
+      ? Object.keys(eventsBarChart[0]).filter((key) => key !== 'event')
+      : [];
+
+      console.log(emotions);
+
+  // Define colors for each emotion
+  const emotionColors = {
+    Happy: '#FFD700', // Gold
+    Sad: '#1E90FF', // DodgerBlue
+    Disgusted: '#008000', // Green
+    Surprised: '#FF69B4', // HotPink
+    Neutral: '#A52A2A', // Brown
+    Fearful: '#800080', // Purple
+    Angry: '#FF0000', // Red
+  };
+
+  // Construct series for BarChartComponent
+  const series = emotions.map((emotion) => ({
+    dataKey: emotion,
+    label: emotion,
+    fill: emotionColors[emotion] || '#000000', // Default to black if emotion not found
+  }));
+
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
@@ -35,233 +105,103 @@ export default function AppView() {
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={3}>
+        {/* Widgets */}
+        <Grid item xs={12} sm={6} md={3}>
           <AppWidgetSummary
             title="Total Events"
-            total={4}
+            total={summaryData.totalEvents}
             color="success"
             icon={<img alt="icon" src="/assets/icons/app-view/events_list.png" />}
           />
         </Grid>
-
-        <Grid xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <AppWidgetSummary
             title="Active Events"
-            total={4}
+            total={summaryData.activeEvents}
             color="info"
             icon={<img alt="icon" src="/assets/icons/app-view/active_event.png" />}
           />
         </Grid>
-
-        <Grid xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <AppWidgetSummary
-            title="Emotions detected"
-            total={10000}
+            title="Emotions Detected"
+            total={summaryData.totalEmotions}
             color="warning"
             icon={<img alt="icon" src="/assets/icons/app-view/total_emotions.png" />}
           />
         </Grid>
-
-        <Grid xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <AppWidgetSummary
-            title="Number of cameras"
-            total={8}
+            title="Number of Cameras"
+            total={summaryData.totalCameras}
             color="error"
             icon={<img alt="icon" src="/assets/icons/app-view/cameras.png" />}
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
-          <AppWebsiteVisits
-            title="Emotions per Event"
-            subheader="(+43%) than last year"
-            chart={{
-              labels: [
-                '01/01/2023',
-                '02/01/2023',
-                '03/01/2023',
-                '04/01/2023',
-                '05/01/2023',
-                '06/01/2023',
-                '07/01/2023',
-                '08/01/2023',
-                '09/01/2023',
-                '10/01/2023',
-                '11/01/2023',
-              ],
-              series: [
-                {
-                  name: 'KFUPM Expo',
-                  type: 'column',
-                  fill: 'solid',
-                  data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30],
-                },
-                {
-                  name: 'Innovation Expo',
-                  type: 'area',
-                  fill: 'gradient',
-                  data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43],
-                },
-                {
-                  name: 'Riyadh Boulevard',
-                  type: 'line',
-                  fill: 'solid',
-                  data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39],
-                },
-                {
-                  name: 'Tech Summit',
-                  type: 'line',
-                  fill: 'solid',
-                  data: [14, 12, 22, 23, 19, 18, 37, 41, 51, 33, 23],
-                },
-              ],
-            }}
-          />
-        </Grid>
+        {/* Charts */}
+        {appWebsiteVisitsData.chart && (
+          <Grid item xs={12} md={6} lg={8}>
+            <AppWebsiteVisits
+              title="Emotions per Event"
+              subheader={appWebsiteVisitsData.subheader}
+              chart={appWebsiteVisitsData.chart}
+            />
+          </Grid>
+        )}
 
-        <Grid xs={12} md={6} lg={4}>
-          <AppCurrentVisits
-            title="Emotions Events percentage"
-            chart={{
-              series: [
-                { label: 'KFUPM Expo', value: 4344 },
-                { label: 'Innovation Expo', value: 5435 },
-                { label: 'Riyadh Boulevard', value: 1443 },
-                { label: 'Tech Summit', value: 4443 },
-              ],
-            }}
-          />
-        </Grid>
+        {totalEmotionsPerEvent && (
+          <Grid item xs={12} md={6} lg={4}>
+            <AppCurrentVisits
+              title="Emotions Events Percentage"
+              chart={{
+                series: totalEmotionsPerEvent,
+              }}
+            />
+          </Grid>
+        )}
 
-        <Grid xs={12} md={6} lg={8} style={{ marginTop: '580px' }}>
-          {/* <AppConversionRates
-            title="Conversion Rates"
-            subheader="(+43%) than last year"
-            chart={{
-              series: [
-                { label: 'Italy', value: 400 },
-                { label: 'Japan', value: 430 },
-                { label: 'China', value: 448 },
-                { label: 'Canada', value: 470 },
-                { label: 'France', value: 540 },
-                { label: 'Germany', value: 580 },
-                { label: 'South Korea', value: 690 },
-                { label: 'Netherlands', value: 1100 },
-                { label: 'United States', value: 1200 },
-                { label: 'United Kingdom', value: 1380 },
-              ],
-            }}
-          /> */}
-          <BarChartComponent
-            title="Emotion Distribution per Event"
-            subheader="Aggregated data over the last 12 months"
-            dataset={eventsBarChart}
-            xAxis={{ dataKey: 'event' }}
-            series={[
-              { dataKey: 'Happy', label: 'Happy', fill: '#8884d8' },
-              { dataKey: 'Sad', label: 'Sad', fill: '#82ca9d' },
-              { dataKey: 'Disgusted', label: 'Disgusted', fill: '#ffc658' },
-              { dataKey: 'Surprised', label: 'Surprised', fill: '#d0ed57' },
-              { dataKey: 'Natural', label: 'Natural', fill: '#a4de6c' },
-              { dataKey: 'Fear', label: 'Fear', fill: '#d88884' },
-            ]}
-            
+        {eventsBarChart && (
+          <Grid item xs={12} md={6} lg={8}>
+            <BarChartComponent
+              title="Emotion Distribution per Event"
+              subheader="Aggregated data over the last 12 months"
+              dataset={eventsBarChart}
+              xAxis={{ dataKey: 'event' }}
+              series={series}
+            />
+          </Grid>
+        )}
 
-          />
-        </Grid>
+        {heatmapData && heatmapData.series && (
+          <Grid item xs={12} md={6} lg={4}>
+            <AppCurrentSubject title="Emotions Map" chart={heatmapData} />
+          </Grid>
+        )}
 
-        <Grid xs={12} md={6} lg={4}>
-          <AppCurrentSubject
-            title="Emotions Map"
-            chart={{
-              categories: ['Happy', 'Sad', 'Disgusted', 'Surprised', 'Natural', 'Fear'],
-              series: [
-                { name: 'KFUPM Expo', data: [80, 50, 30, 40, 100, 20] },
-                { name: 'Innovation Expo', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Riyadh Boulevard', data: [44, 76, 78, 13, 43, 10] },
-                { name: 'Tech Summit', data: [44, 76, 78, 13, 43, 10] },
-              ],
-            }}
-          />
-        </Grid>
+        {completeEventData.length > 0 && (
+          <Grid item xs={12} md={6} lg={8}>
+            <InteractiveLineChart
+              title="Event Emotion Analysis"
+              subheader="Monthly emotion distribution per event"
+              completeEventData={completeEventData}
+              events={events}
+              emotions={emotions}
+            />
+          </Grid>
+        )}
 
-        <Grid xs={12} md={6} lg={8}>
-          {/* <BarChartComponent
-  title="Emotion Distribution per Event"
-  subheader="Aggregated data over the last 12 months"
-  dataset={eventsBarChart}
-  xAxis={{ dataKey: 'event' }}
-  series={[
-    { dataKey: 'Happy', label: 'Happy', fill: '#8884d8' },
-    { dataKey: 'Sad', label: 'Sad', fill: '#82ca9d' },
-    { dataKey: 'Disgusted', label: 'Disgusted', fill: '#ffc658' },
-    { dataKey: 'Surprised', label: 'Surprised', fill: '#d0ed57' },
-    { dataKey: 'Natural', label: 'Natural', fill: '#a4de6c' },
-    { dataKey: 'Fear', label: 'Fear', fill: '#d88884' },
-  ]}
-/> */}
+        {eventsTimeline && (
+          <Grid item xs={12} md={6} lg={4}>
+            <AppOrderTimeline
+              title="Events Timeline"
+              eventsTimeline={eventsTimeline}
+              style={{ height: '580px' }}
+            />
+          </Grid>
+        )}
 
-    <InteractiveLineChart
-      title="Event Emotion Analysis"
-      subheader="Monthly emotion distribution per event"
-      completeEventData={completeEventData}
-      events={events}
-      emotions={emotions}
-    />
-
-
-
-
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AppOrderTimeline
-            title="Events Timeline"
-            eventsTimeline={eventsTimeLine}
-            style={{ height: '580px' }}
-          />
-        </Grid>
-
-        {/* <Grid xs={12} md={6} lg={4}>
-          <AppTrafficBySite
-            title="Traffic by Site"
-            list={[
-              {
-                name: 'KFUPM Expo',
-                value: 323234,
-                icon: <Iconify icon="eva:facebook-fill" color="#1877F2" width={32} />,
-              },
-              {
-                name: 'Riyadh boulevard',
-                value: 341212,
-                icon: <Iconify icon="eva:google-fill" color="#DF3E30" width={32} />,
-              },
-              {
-                name: 'Linkedin',
-                value: 411213,
-                icon: <Iconify icon="eva:linkedin-fill" color="#006097" width={32} />,
-              },
-              {
-                name: 'Twitter',
-                value: 443232,
-                icon: <Iconify icon="eva:twitter-fill" color="#1C9CEA" width={32} />,
-              },
-            ]}
-          />
-        </Grid> */}
-
-        {/* <Grid xs={12} md={6} lg={8}>
-          <AppTasks
-            title="Tasks"
-            list={[
-              { id: '1', name: 'Create FireStone Logo' },
-              { id: '2', name: 'Add SCSS and JS files if required' },
-              { id: '3', name: 'Stakeholder Meeting' },
-              { id: '4', name: 'Scoping & Estimations' },
-              { id: '5', name: 'Sprint Showcase' },
-            ]}
-          />
-        </Grid> */}
+        {/* Additional components can be added here */}
       </Grid>
     </Container>
   );
