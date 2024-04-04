@@ -16,7 +16,7 @@ import EventTableRow from '../event-table-row';
 import EventTableToolbar from '../event-table-toolbar';
 import TableNoData from '../table-no-data';
 import TableEmptyRows from '../table-empty-rows';
-import { applyFilter, getComparator } from '../utils_event';
+import { applyFilter, getComparator} from '../utils_event';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -46,7 +46,6 @@ export default function EventPage() {
       });
   }, []);
 
-  // Function to refresh the event list
   const refreshEventList = async () => {
     try {
       setLoading(true);
@@ -88,7 +87,6 @@ export default function EventPage() {
     const selectedIndex = selected.indexOf(id);
     let newSelected =
       selectedIndex === -1 ? [...selected, id] : selected.filter((selectedId) => selectedId !== id);
-
     setSelected(newSelected);
   };
 
@@ -153,13 +151,13 @@ export default function EventPage() {
                         key={row._id}
                         eventName={row.name}
                         organizer={row.organizer}
-                        eventId={row._id} // Make sure to pass the eventId prop
-                        id={row._id} // 'id' is used instead of 'eventId' to match the unified propTypes
+                        eventId={row._id}
+                        id={row._id}
                         description={row.description}
                         startDate={row.startingDate}
                         endDate={row.endingDate}
-                        status={row.status.charAt(0).toUpperCase() + row.status.slice(1)} // Keep transforming "active" to "Active"
-                        location={row.location} // Passed only if available
+                        status={row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+                        location={row.location}
                         selected={selected.includes(row._id)}
                         handleClick={() => handleClick(row._id)}
                         refreshEventList={refreshEventList}
@@ -168,8 +166,8 @@ export default function EventPage() {
                 ) : (
                   <TableNoData query={filterName} />
                 )}
+ 
 
-                {emptyRows > 0 && <TableEmptyRows emptyRows={emptyRows} />}
               </TableBody>
             </Table>
           </TableContainer>
