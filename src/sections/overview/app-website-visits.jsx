@@ -41,7 +41,7 @@ export default function AppWebsiteVisits({ title, subheader, chart, ...other }) 
   });
 
   return (
-    <Card {...other}>
+    <Card {...other} style={{ height: '100%' }}>
       <CardHeader title={title} subheader={subheader} />
 
       <Box sx={{ p: 3, pb: 1 }}>

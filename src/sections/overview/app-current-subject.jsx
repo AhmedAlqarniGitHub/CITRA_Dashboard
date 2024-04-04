@@ -56,7 +56,7 @@ export default function AppCurrentSubject({ title, subheader, chart, ...other })
   });
 
   return (
-    <Card {...other}>
+    <Card {...other} style={{ height: '100%' }}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 5 }} />
 
       <StyledChart

@@ -57,7 +57,7 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
   }));
 
   return (
-    <Card>
+    <Card style={{ height: '100%' }}>
       <CardHeader title={title} subheader={subheader} />
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={transformedData}>
@@ -80,7 +80,9 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
               label="Emotion"
             >
               {emotions.map((emotion) => (
-                <MenuItem key={emotion} value={emotion}>{emotion}</MenuItem>
+                <MenuItem key={emotion} value={emotion}>
+                  {emotion}
+                </MenuItem>
               ))}
             </Select>
           </StyledFormControl>
@@ -93,7 +95,9 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
               label="Event"
             >
               {events.map((event) => (
-                <MenuItem key={event} value={event}>{event}</MenuItem>
+                <MenuItem key={event} value={event}>
+                  {event}
+                </MenuItem>
               ))}
             </Select>
           </StyledFormControl>

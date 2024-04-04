@@ -16,7 +16,7 @@ import { fDateTime } from 'src/utils/format-time'; // Ensure the path to this ut
 
 
 const cardStyle = {
-  height: 'auto', // This can be a specific value or 'auto' for natural height
+  height: '100%', // This can be a specific value or 'auto' for natural height
   overflow: 'auto' // Add a scrollbar if content overflows
 };
 function OrderItem({ item, lastTimeline }) {

@@ -8,9 +8,9 @@ import CardHeader from '@mui/material/CardHeader';
 
 const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartSetting }) => {
   return (
-    <Card>
+    <Card style={{ height: '100%' }}>
       <CardHeader title={title} subheader={subheader} />
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height="80%">
         <BarChart
           data={dataset}
           layout="vertical" // Adjusted for horizontal layout
@@ -18,7 +18,8 @@ const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartS
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" />
-          <YAxis type="category" dataKey={xAxis.dataKey} width={120} /> // Adjusted for horizontal layout
+          <YAxis type="category" dataKey={xAxis.dataKey} width={120} /> // Adjusted for horizontal
+          layout
           <Tooltip />
           <Legend />
           {series.map(({ dataKey, label, fill }, index) => (

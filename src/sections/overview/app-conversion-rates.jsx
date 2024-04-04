@@ -40,7 +40,7 @@ export default function AppConversionRates({ title, subheader, chart, ...other }
   });
 
   return (
-    <Card {...other}>
+    <Card style={{ height: '100%' }} {...other}>
       <CardHeader title={title} subheader={subheader} />
 
       <Box sx={{ mx: 3 }}>

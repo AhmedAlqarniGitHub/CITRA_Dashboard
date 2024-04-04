@@ -9,8 +9,14 @@ import BarChartComponent from '../app-bar-chart';
 import AppCurrentSubject from '../app-current-subject';
 import InteractiveLineChart from '../app-line-chart';
 import AppOrderTimeline from '../app-order-timeline';
+import AppSatisfactionGauge from '../app-satisfaction-guage';
+
 import axios from 'axios';
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+const chartStyle = {
+  height: '580px', // Adjust this value as needed
+};
 
 export default function AppView() {
   const [chartData, setChartData] = useState({
@@ -28,6 +34,8 @@ export default function AppView() {
     totalEmotions: 0,
     totalCameras: 0,
   });
+
+  const [events, setEvents] = useState([]); // New state for events
 
   useEffect(() => {
     const fetchSummaryData = async () => {
@@ -50,6 +58,12 @@ export default function AppView() {
       try {
         const response = await axios.get(`${apiBaseUrl}/events/charts`);
         setChartData(response.data);
+
+        const fetchedEvents =
+          response.data.completeEventData.length > 0
+            ? Object.keys(response.data.completeEventData[0]).filter((key) => key !== 'month')
+            : [];
+        setEvents(fetchedEvents);
       } catch (error) {
         console.error('Axios error:', error.message);
       }
@@ -67,18 +81,13 @@ export default function AppView() {
     heatmapData,
     appWebsiteVisitsData,
   } = chartData;
-  // Extract event names from completeEventData
-  const events =
-    completeEventData.length > 0
-      ? Object.keys(completeEventData[0]).filter((key) => key !== 'month')
-      : [];
 
   const emotions =
     eventsBarChart.length > 0
       ? Object.keys(eventsBarChart[0]).filter((key) => key !== 'event')
       : [];
 
-      console.log(emotions);
+  console.log(emotions);
 
   // Define colors for each emotion
   const emotionColors = {
@@ -138,10 +147,9 @@ export default function AppView() {
             icon={<img alt="icon" src="/assets/icons/app-view/cameras.png" />}
           />
         </Grid>
-
         {/* Charts */}
         {appWebsiteVisitsData.chart && (
-          <Grid item xs={12} md={6} lg={8}>
+          <Grid item xs={12} md={6} lg={8} style={chartStyle}>
             <AppWebsiteVisits
               title="Emotions per Event"
               subheader={appWebsiteVisitsData.subheader}
@@ -149,9 +157,8 @@ export default function AppView() {
             />
           </Grid>
         )}
-
         {totalEmotionsPerEvent && (
-          <Grid item xs={12} md={6} lg={4}>
+          <Grid item xs={12} md={6} lg={4} style={chartStyle}>
             <AppCurrentVisits
               title="Emotions Events Percentage"
               chart={{
@@ -160,43 +167,47 @@ export default function AppView() {
             />
           </Grid>
         )}
-
         {eventsBarChart && (
-          <Grid item xs={12} md={6} lg={8}>
+          <Grid item xs={12} md={6} lg={8} style={chartStyle}>
             <BarChartComponent
               title="Emotion Distribution per Event"
               subheader="Aggregated data over the last 12 months"
               dataset={eventsBarChart}
               xAxis={{ dataKey: 'event' }}
               series={series}
+              style={{ height: '580px' }}
             />
           </Grid>
         )}
 
+        {eventsTimeline && (
+          <Grid item xs={12} md={6} lg={4} style={chartStyle}>
+            <AppOrderTimeline
+              title="Events Timeline"
+              eventsTimeline={eventsTimeline}
+              // style={{ height: '580px' }}
+            />
+          </Grid>
+        )}
+
+        <Grid item xs={12} md={6} lg={6} style={chartStyle}>
+          <AppSatisfactionGauge title="Event Satisfaction" />
+        </Grid>
+
         {heatmapData && heatmapData.series && (
-          <Grid item xs={12} md={6} lg={4}>
+          <Grid item xs={12} md={6} lg={6} style={chartStyle}>
             <AppCurrentSubject title="Emotions Map" chart={heatmapData} />
           </Grid>
         )}
 
         {completeEventData.length > 0 && (
-          <Grid item xs={12} md={6} lg={8}>
+          <Grid item xs={12} md={6} lg={12} style={chartStyle}>
             <InteractiveLineChart
               title="Event Emotion Analysis"
               subheader="Monthly emotion distribution per event"
               completeEventData={completeEventData}
               events={events}
               emotions={emotions}
-            />
-          </Grid>
-        )}
-
-        {eventsTimeline && (
-          <Grid item xs={12} md={6} lg={4}>
-            <AppOrderTimeline
-              title="Events Timeline"
-              eventsTimeline={eventsTimeline}
-              style={{ height: '580px' }}
             />
           </Grid>
         )}
