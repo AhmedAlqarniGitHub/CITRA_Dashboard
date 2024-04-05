@@ -9,7 +9,13 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-
+import axios from 'axios';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
 import { cameras } from 'src/_mock/camera';
 
 import Iconify from 'src/components/iconify';
@@ -21,6 +27,9 @@ import CameraTableHead from '../camera-table-head';
 import TableEmptyRows from '../table-empty-rows';
 import CameraTableToolbar from '../camera-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
+
+
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // ----------------------------------------------------------------------
 
@@ -36,6 +45,38 @@ export default function CameraPage() {
   const [filterName, setFilterName] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const [openCameraDialog, setOpenCameraDialog] = useState(false);
+  const [newCamera, setNewCamera] = useState({
+    manufacturer: '',
+    model: '',
+    supportedQuality: '1080p', // Default quality
+    framesPerSecond: 30, // Default FPS
+  });
+
+  const handleCameraDialogOpen = () => setOpenCameraDialog(true);
+  const handleCameraDialogClose = () => setOpenCameraDialog(false);
+
+  const handleCameraChange = (e) => {
+    const { name, value } = e.target;
+    setNewCamera(prev => ({ ...prev, [name]: value }));
+  };
+
+
+  const handleSubmitCamera = async () => {
+    // Validation logic here...
+
+    try {
+      const response = await axios.post(`${apiBaseUrl}/cameras/add`, newCamera);
+      console.log(response.data);
+      handleCameraDialogClose(); // Close dialog on success
+      // Refresh camera list or show success message...
+    } catch (error) {
+      console.error('Error adding camera:', error);
+      // Show error feedback...
+    }
+  };
+
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -101,9 +142,10 @@ export default function CameraPage() {
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Cameras</Typography>
 
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleCameraDialogOpen}>
           New Camera
         </Button>
+
       </Stack>
 
       <Card>
@@ -168,6 +210,65 @@ export default function CameraPage() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
+
+      <Dialog open={openCameraDialog} onClose={handleCameraDialogClose}>
+        <DialogTitle>Add New Camera</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            name="manufacturer"
+            label="Manufacturer"
+            type="text"
+            fullWidth
+            value={newCamera.manufacturer}
+            onChange={handleCameraChange}
+          />
+          <TextField
+            margin="dense"
+            name="model"
+            label="Model"
+            type="text"
+            fullWidth
+            value={newCamera.model}
+            onChange={handleCameraChange}
+          />
+          <TextField
+            margin="dense"
+            name="supportedQuality"
+            label="Supported Quality"
+            select
+            fullWidth
+            value={newCamera.supportedQuality}
+            onChange={handleCameraChange}
+          >
+            {/* Add MenuItem components for each supported quality option */}
+            <MenuItem value="720p">720p</MenuItem>
+            <MenuItem value="1080p">1080p</MenuItem>
+            <MenuItem value="4k">4k</MenuItem>
+          </TextField>
+          <TextField
+            margin="dense"
+            name="framesPerSecond"
+            label="Frames Per Second (FPS)"
+            select
+            fullWidth
+            value={newCamera.framesPerSecond}
+            onChange={handleCameraChange}
+          >
+            <MenuItem value={24}>24 FPS (Cinematic)</MenuItem>
+            <MenuItem value={30}>30 FPS (Standard)</MenuItem>
+            <MenuItem value={60}>60 FPS (Smooth)</MenuItem>
+            <MenuItem value={120}>120 FPS (High Frame Rate)</MenuItem>
+          </TextField>
+
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCameraDialogClose}>Cancel</Button>
+          <Button onClick={handleSubmitCamera}>Submit</Button>
+        </DialogActions>
+      </Dialog>
+
     </Container>
   );
 }
