@@ -6,6 +6,8 @@ import Checkbox from '@mui/material/Checkbox';
 import TableHead from '@mui/material/TableHead';
 import TableCell from '@mui/material/TableCell';
 import TableSortLabel from '@mui/material/TableSortLabel';
+import Iconify from 'src/components/iconify';
+import { IconButton } from '@mui/material';
 
 import { visuallyHidden } from './utils';
 
@@ -57,6 +59,11 @@ export default function CameraTableHead({
             </TableSortLabel>
           </TableCell>
         ))}
+        <TableCell style={{ textAlign: 'right' }}>
+          <IconButton disabled>
+            <Iconify icon="eva:more-vertical-fill" width="24" height="24" />
+          </IconButton>
+        </TableCell>
       </TableRow>
     </TableHead>
   );

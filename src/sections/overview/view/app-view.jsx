@@ -84,20 +84,20 @@ export default function AppView() {
 
   const emotions =
     eventsBarChart.length > 0
-      ? Object.keys(eventsBarChart[0]).filter((key) => key !== 'event')
+      ? Object.keys(eventsBarChart[0]).filter((key) => key !== 'event').map(e=>e.toLowerCase())
       : [];
 
   console.log(emotions);
 
   // Define colors for each emotion
   const emotionColors = {
-    Happy: '#FFD700', // Gold
-    Sad: '#1E90FF', // DodgerBlue
-    Disgusted: '#008000', // Green
-    Surprised: '#FF69B4', // HotPink
-    Neutral: '#A52A2A', // Brown
-    Fearful: '#800080', // Purple
-    Angry: '#FF0000', // Red
+    happy: '#FFD700', // Gold
+    sad: '#1E90FF', // DodgerBlue
+    disgusted: '#008000', // Green
+    surprised: '#FF69B4', // HotPink
+    neutral: '#A52A2A', // Brown
+    fearful: '#800080', // Purple
+    angry: '#FF0000', // Red
   };
 
   // Construct series for BarChartComponent

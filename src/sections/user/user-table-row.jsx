@@ -1,105 +1,230 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-
-import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
-import Popover from '@mui/material/Popover';
-import TableRow from '@mui/material/TableRow';
-import Checkbox from '@mui/material/Checkbox';
-import MenuItem from '@mui/material/MenuItem';
-import TableCell from '@mui/material/TableCell';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-
+import {
+  TableRow,
+  TableCell,
+  Checkbox,
+  TextField,
+  IconButton,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+  Avatar,
+  Stack,
+  Typography,
+} from '@mui/material';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
+import axios from 'axios';
 
-// ----------------------------------------------------------------------
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function UserTableRow({
+  id,
   selected,
   name,
   avatarUrl,
-  eventName,
-  role,
-  isVerified,
-  status,
+  roleName,
+  email,
+  description,
   handleClick,
+  refreshUserList,
 }) {
-  const [open, setOpen] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedUser, setEditedUser] = useState({
+    name,
+    roleName,
+    email,
+    description,
+  });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const handleOpenMenu = (event) => {
-    setOpen(event.currentTarget);
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleCloseMenu = () => {
-    setOpen(null);
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEdit = () => {
+    setEditedUser({
+      name,
+      roleName,
+      email,
+      description,
+    });
+    setIsEditMode(true);
+    handleMenuClose();
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+    setEditedUser({
+      name,
+      roleName,
+      email,
+      description,
+    });
+  };
+
+  const handleChange = (prop) => (event) => {
+    setEditedUser({ ...editedUser, [prop]: event.target.value });
+  };
+
+  const handleSave = async () => {
+    const userToUpdate = {
+      name: editedUser.name,
+      role: editedUser.roleName,
+      email: editedUser.email,
+      description: editedUser.description,
+    };
+
+    try {
+      await axios.patch(`${apiBaseUrl}/users/update/${id}`, userToUpdate);
+      refreshUserList();
+      setIsEditMode(false);
+    } catch (error) {
+      console.error('Error saving edited data:', error);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`${apiBaseUrl}/users/${id}`);
+      refreshUserList();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+    setDeleteDialogOpen(false);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
   };
 
   return (
     <>
       <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
         <TableCell padding="checkbox">
-          <Checkbox disableRipple checked={selected} onChange={handleClick} />
+          <Checkbox disableRipple checked={selected} onChange={(event) => handleClick(event, id)} />
         </TableCell>
 
         <TableCell component="th" scope="row" padding="none">
           <Stack direction="row" alignItems="center" spacing={2}>
             <Avatar alt={name} src={avatarUrl} />
             <Typography variant="subtitle2" noWrap>
-              {name}
+              {isEditMode ? (
+                <TextField value={editedUser.name} onChange={handleChange('name')} />
+              ) : (
+                name
+              )}
             </Typography>
           </Stack>
         </TableCell>
 
-        <TableCell>{eventName}</TableCell>
-
-        <TableCell>{role}</TableCell>
-
-        <TableCell align="center">{isVerified ? 'Yes' : 'No'}</TableCell>
+        <TableCell>
+          {isEditMode ? (
+            <TextField
+              select
+              value={editedUser.roleName}
+              onChange={handleChange('roleName')}
+            >
+              <MenuItem value="organizer">Organizer</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="attendee">Attendee</MenuItem>
+            </TextField>
+          ) : (
+            roleName
+          )}
+        </TableCell>
 
         <TableCell>
-          <Label color={(status === 'inactive' && 'error') || 'success'}>{status}</Label>
+          {isEditMode ? (
+            <TextField value={editedUser.email} onChange={handleChange('email')} />
+          ) : (
+            email
+          )}
+        </TableCell>
+
+        <TableCell>
+          {isEditMode ? (
+            <TextField value={editedUser.description} onChange={handleChange('description')} />
+          ) : (
+            description
+          )}
         </TableCell>
 
         <TableCell align="right">
-          <IconButton onClick={handleOpenMenu}>
-            <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
+          {isEditMode ? (
+            <>
+              <IconButton onClick={handleSave} color="primary">
+                <Iconify icon="eva:checkmark-circle-2-outline" width="24" height="24" />
+              </IconButton>
+              <IconButton onClick={handleCancelEdit} color="secondary">
+                <Iconify icon="eva:close-circle-outline" width="24" height="24" />
+              </IconButton>
+            </>
+          ) : (
+            <IconButton onClick={handleMenuOpen}>
+              <Iconify icon="eva:more-vertical-fill" width="24" height="24" />
+            </IconButton>
+          )}
+          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+            <MenuItem onClick={handleEdit}>
+              <Iconify icon="eva:edit-fill" width="24" height="24" />
+              Edit
+            </MenuItem>
+            <MenuItem onClick={handleDeleteClick}>
+              <Iconify icon="eva:trash-2-outline" width="24" height="24" />
+              Delete
+            </MenuItem>
+          </Menu>
         </TableCell>
       </TableRow>
 
-      <Popover
-        open={!!open}
-        anchorEl={open}
-        onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: { width: 140 },
-        }}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
       >
-        <MenuItem onClick={handleCloseMenu}>
-          <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
-          Edit
-        </MenuItem>
-
-        <MenuItem onClick={handleCloseMenu} sx={{ color: 'error.main' }}>
-          <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
-          Delete
-        </MenuItem>
-      </Popover>
+        <DialogTitle id="alert-dialog-title">{'Confirm Delete'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this user?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+          <Button onClick={handleDelete} color="primary" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
 
 UserTableRow.propTypes = {
-  avatarUrl: PropTypes.any,
-  eventName: PropTypes.any,
-  handleClick: PropTypes.func,
-  isVerified: PropTypes.any,
-  name: PropTypes.any,
-  role: PropTypes.any,
-  selected: PropTypes.any,
-  status: PropTypes.string,
+  id: PropTypes.string.isRequired,
+  selected: PropTypes.bool.isRequired,
+  name: PropTypes.string.isRequired,
+  avatarUrl: PropTypes.string,
+  roleName: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  handleClick: PropTypes.func.isRequired,
+  refreshUserList: PropTypes.func.isRequired,
 };

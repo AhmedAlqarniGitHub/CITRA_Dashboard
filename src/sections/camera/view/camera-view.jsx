@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -28,7 +28,6 @@ import TableEmptyRows from '../table-empty-rows';
 import CameraTableToolbar from '../camera-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
-
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // ----------------------------------------------------------------------
@@ -54,29 +53,41 @@ export default function CameraPage() {
     framesPerSecond: 30, // Default FPS
   });
 
+  const [cameras, setCameras] = useState([]);
+
+  useEffect(() => {
+    refreshCameraList();
+  }, []);
+
+  const refreshCameraList = () => {
+    axios
+      .get(`${apiBaseUrl}/cameras/all`)
+      .then((response) => {
+        setCameras(response.data);
+      })
+      .catch((err) => console.error('Error fetching cameras:', err));
+  };
+
   const handleCameraDialogOpen = () => setOpenCameraDialog(true);
   const handleCameraDialogClose = () => setOpenCameraDialog(false);
 
   const handleCameraChange = (e) => {
     const { name, value } = e.target;
-    setNewCamera(prev => ({ ...prev, [name]: value }));
+    setNewCamera((prev) => ({ ...prev, [name]: value }));
   };
-
 
   const handleSubmitCamera = async () => {
     // Validation logic here...
-
     try {
       const response = await axios.post(`${apiBaseUrl}/cameras/add`, newCamera);
       console.log(response.data);
-      handleCameraDialogClose(); // Close dialog on success
-      // Refresh camera list or show success message...
+      handleCameraDialogClose();
+      refreshCameraList(); // Refresh the camera list
     } catch (error) {
       console.error('Error adding camera:', error);
       // Show error feedback...
     }
   };
-
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -127,12 +138,11 @@ export default function CameraPage() {
     setFilterName(event.target.value);
   };
 
-
   const dataFiltered = applyFilter({
     inputData: cameras,
     comparator: getComparator(order, orderBy),
     filterName,
-    filterFields: ['manufacturer', 'name', 'supportedQuality', 'framesPerSecond'] // Specify searchable fields
+    filterFields: ['manufacturer', 'model', 'supportedQuality', 'framesPerSecond'], // Specify searchable fields
   });
 
   const notFound = !dataFiltered.length && !!filterName;
@@ -142,10 +152,14 @@ export default function CameraPage() {
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Cameras</Typography>
 
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleCameraDialogOpen}>
+        <Button
+          variant="contained"
+          color="inherit"
+          startIcon={<Iconify icon="eva:plus-fill" />}
+          onClick={handleCameraDialogOpen}
+        >
           New Camera
         </Button>
-
       </Stack>
 
       <Card>
@@ -167,25 +181,26 @@ export default function CameraPage() {
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
                   { id: 'manufacturer', label: 'Manufacturer' },
-                  { id: 'name', label: 'Model' },
+                  { id: 'model', label: 'Model' },
                   { id: 'supportedQuality', label: 'Quality' },
                   { id: 'framesPerSecond', label: 'FPS' },
                 ]}
-
               />
               <TableBody>
                 {dataFiltered
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((camera) => (
                     <CameraTableRow
-                      key={camera.id} // Unique key for each row
+                      key={camera._id} // Unique key for each row
+                      id={camera._id}
                       selected={selected.indexOf(camera.id) !== -1}
                       handleClick={(event) => handleClick(event, camera.id)}
                       manufacturer={camera.manufacturer} // Correctly pass manufacturer info
-                      name={camera.name} // Correctly pass model name
+                      model={camera.model || camera.name} // Correctly pass model name
                       supportedQuality={camera.supportedQuality} // Pass quality info
                       framesPerSecond={camera.framesPerSecond} // Ensure FPS data is passed
                       status={camera.status} // Assuming you have a 'status' field in your camera objects
+                      refreshCameraList={refreshCameraList} // Add this to refresh the list after update/delete
                     />
                   ))}
 
@@ -261,14 +276,12 @@ export default function CameraPage() {
             <MenuItem value={60}>60 FPS (Smooth)</MenuItem>
             <MenuItem value={120}>120 FPS (High Frame Rate)</MenuItem>
           </TextField>
-
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCameraDialogClose}>Cancel</Button>
           <Button onClick={handleSubmitCamera}>Submit</Button>
         </DialogActions>
       </Dialog>
-
     </Container>
   );
 }
