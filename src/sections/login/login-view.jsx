@@ -1,5 +1,6 @@
-import { useState } from 'react';
-
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
@@ -12,66 +13,56 @@ import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
-
-import { useRouter } from 'src/routes/hooks';
-
+import Iconify from 'src/components/iconify';
+import Logo from 'src/components/logo';
 import { bgGradient } from 'src/theme/css';
 
-import Logo from 'src/components/logo';
-import Iconify from 'src/components/iconify';
 
-// ----------------------------------------------------------------------
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function LoginView() {
   const theme = useTheme();
-
-  const router = useRouter();
-
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
+  const [loginInfo, setLoginInfo] = useState({
+    email: '',
+    password: ''
+  });
 
-  const handleClick = () => {
-    router.push('/dashboard');
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setLoginInfo(prevState => ({ ...prevState, [name]: value }));
   };
 
-  const renderForm = (
-    <>
-      <Stack spacing={3}>
-        <TextField name="email" label="Email address" />
+  const handleLogin = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${apiBaseUrl}/users/login`, loginInfo); // Adjust the URL as needed
+      if (response.status === 200) {
+        window.localStorage.setItem("id", response.data.info.id);
+        window.localStorage.setItem("name", response.data.info.name);
+        window.localStorage.setItem("role", response.data.info.role);
+        navigate('/'); // Redirect to the homepage or another route on successful login
+      } else {
+        window.localStorage.removeItem("id");
+        window.localStorage.removeItem("name");
+        window.localStorage.removeItem("role");    
+        setLoginError('Unexpected error occurred. Please try again.'); // Fallback error message
+      }
+    } catch (error) {
+      // Set the error message from the backend if available, otherwise a generic error message
+      window.localStorage.removeItem("id");
+      window.localStorage.removeItem("name");
+      window.localStorage.removeItem("role"); 
+      setLoginError(error.response?.data?.error || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        <TextField
-          name="password"
-          label="Password"
-          type={showPassword ? 'text' : 'password'}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                  <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Stack>
 
-      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
-        <Link variant="subtitle2" underline="hover">
-          Forgot password?
-        </Link>
-      </Stack>
-
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        variant="contained"
-        color="inherit"
-        onClick={handleClick}
-      >
-        Login
-      </LoadingButton>
-    </>
-  );
 
   return (
     <Box
@@ -99,7 +90,9 @@ export default function LoginView() {
             maxWidth: 420,
           }}
         >
-          <Typography variant="h4">Sign in to Minimal</Typography>
+          <Typography variant="h4" gutterBottom>
+            Sign in to CITRA
+          </Typography>
 
           <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
             Don’t have an account?
@@ -108,45 +101,57 @@ export default function LoginView() {
             </Link>
           </Typography>
 
-          <Stack direction="row" spacing={2}>
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-            >
-              <Iconify icon="eva:google-fill" color="#DF3E30" />
-            </Button>
 
-            <Button
+          <Stack spacing={3}>
+            <TextField
               fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-            >
-              <Iconify icon="eva:facebook-fill" color="#1877F2" />
-            </Button>
+              name="email"
+              label="Email address"
+              onChange={handleChange}
+              value={loginInfo.email}
+            />
 
-            <Button
+            <TextField
+              fullWidth
+              name="password"
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              onChange={handleChange}
+              value={loginInfo.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                      <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            {loginError && (
+              <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+                {loginError}
+              </Typography>
+            )}
+
+
+            <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
+              <Link variant="subtitle2" underline="hover">
+                Forgot password?
+              </Link>
+            </Stack>
+
+            <LoadingButton
+              loading={loading}
               fullWidth
               size="large"
-              color="inherit"
-              variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
+              variant="contained"
+              onClick={handleLogin}
             >
-              <Iconify icon="eva:twitter-fill" color="#1C9CEA" />
-            </Button>
+              Login
+            </LoadingButton>
           </Stack>
-
-          <Divider sx={{ my: 3 }}>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              OR
-            </Typography>
-          </Divider>
-
-          {renderForm}
         </Card>
       </Stack>
     </Box>
