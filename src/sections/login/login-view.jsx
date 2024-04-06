@@ -45,12 +45,14 @@ export default function LoginView() {
         window.localStorage.setItem("name", response.data.info.name);
         window.localStorage.setItem("role", response.data.info.role);
         window.localStorage.setItem("email", response.data.info.email);
+        window.localStorage.setItem("avatarUrl", response.data.info.avatarUrl);
         navigate('/'); // Redirect to the homepage or another route on successful login
       } else {
         window.localStorage.removeItem("id");
         window.localStorage.removeItem("name");
         window.localStorage.removeItem("role"); 
-        window.localStorage.removeItem("email");      
+        window.localStorage.removeItem("email"); 
+        window.localStorage.removeItem("avatarUrl");    
         setLoginError('Unexpected error occurred. Please try again.'); // Fallback error message
       }
     } catch (error) {
@@ -58,7 +60,9 @@ export default function LoginView() {
       window.localStorage.removeItem("id");
       window.localStorage.removeItem("name");
       window.localStorage.removeItem("role"); 
-      window.localStorage.removeItem("email");      
+      window.localStorage.removeItem("email");
+      window.localStorage.removeItem("avatarUrl");    
+      
       setLoginError(error.response?.data?.error || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
