@@ -42,7 +42,7 @@ export default function EventPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [open, setOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
-    organizer: '660720849045c0664e4cb45e', //temp
+    organizer: '', 
     eventName: '',
     description: '',
     startDate: '',
@@ -148,7 +148,7 @@ export default function EventPage() {
         startingDate: new Date(newEvent.startDate).toISOString(), // Convert to ISO 8601
         endingDate: new Date(newEvent.endDate).toISOString(), // Convert to ISO 8601
         description: newEvent.description, // Make sure this is a string
-        organizer: '5f50c31b892b3c6e2fae6e8b', // This should be the actual organizer ObjectId from your state/context
+        organizer: window.localStorage.getItem('id'), // This should be the actual organizer ObjectId from your state/context
         status: newEvent.status, // This should be 'active' or 'inactive'
       };
       let user = {
