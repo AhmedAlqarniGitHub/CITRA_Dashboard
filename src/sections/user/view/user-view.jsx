@@ -16,6 +16,9 @@ import {
   DialogTitle,
   MenuItem,
   TextField,
+  Grid,
+  IconButton,
+  Avatar
 } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -37,12 +40,17 @@ export default function UserPage() {
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openUserDialog, setOpenUserDialog] = useState(false);
+  const [openAvatarSelector, setOpenAvatarSelector] = useState(false);
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
     role: 'organizer',
     description: '',
+    avatarUrl: '',
   });
+  const defaultAvatar = '/assets/images/avatars/avatar_2.jpg';
+  //const avatarOptions = ['avatar_1.jpg', 'avatar_2.jpg', 'avatar_3.jpg']; // Example avatar filenames
+  const avatarOptions = Array.from({ length: 15 }, (_, i) => `avatar_${i + 1}.jpg`);
 
   useEffect(() => {
     refreshUserList();
@@ -67,31 +75,12 @@ export default function UserPage() {
   };
 
   const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = users.map((n) => n.name);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
+    setSelected(event.target.checked ? users.map((n) => n.name) : []);
   };
 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
-    }
-
+    let newSelected = selectedIndex === -1 ? [...selected, name] : selected.filter((selectedId) => selectedId !== name);
     setSelected(newSelected);
   };
 
@@ -108,12 +97,6 @@ export default function UserPage() {
     setFilterName(event.target.value);
   };
 
-  const dataFiltered = applyFilter({
-    inputData: users,
-    comparator: getComparator(order, orderBy),
-    filterName,
-  });
-
   const handleUserDialogClickOpen = () => {
     setOpenUserDialog(true);
   };
@@ -122,35 +105,43 @@ export default function UserPage() {
     setOpenUserDialog(false);
   };
 
+  const handleAvatarClickOpen = () => {
+    setOpenAvatarSelector(true);
+  };
+
+  const handleAvatarClose = () => {
+    setOpenAvatarSelector(false);
+  };
+
+  const handleAvatarSelect = (avatar) => {
+    setNewUser({ ...newUser, avatarUrl: avatar });
+    setOpenAvatarSelector(false);
+  };
+
   const handleUserChange = (e) => {
     const { name, value } = e.target;
-    setNewUser((prev) => ({
-      ...prev,
-      [name]: name === 'age' ? parseInt(value, 10) || '' : value, // Ensures age is handled as a number
-    }));
+    setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmitUser = async () => {
-    // Validate newUser against userValidationSchema here...
-    const userData = {
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      description: newUser.description,
-    };
     try {
       let user = {
         id: localStorage.getItem('id'),
       };
       const response = await axios.post(`${apiBaseUrl}/users/register`, userData);
       console.log(response.data);
-      refreshUserList();
-      handleUserDialogClose(); // Close the dialog upon successful submission
+      handleUserDialogClose(); // Close dialog upon successful submission
+      refreshUserList(); // Refresh the user list
     } catch (error) {
       console.error('There was an error submitting the form', error);
-      // Handle UI error feedback
     }
   };
+
+  const dataFiltered = applyFilter({
+    inputData: users,
+    comparator: getComparator(order, orderBy),
+    filterName,
+  });
 
   const notFound = !dataFiltered.length && !!filterName;
 
@@ -189,7 +180,6 @@ export default function UserPage() {
                   { id: 'role', label: 'Role' },
                   { id: 'email', label: 'Email' },
                   { id: 'description', label: 'Description' },
-                  // { id: 'isVerified', label: 'Verified', align: 'center' },
                 ]}
               />
               <TableBody>
@@ -197,21 +187,19 @@ export default function UserPage() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => (
                     <UserTableRow
-                      key={row._id} // Using _id as key
-                      id={row._id} // Ensure id is passed
-                      selected={selected.indexOf(row.name) !== -1}
+                      key={row._id}
+                      id={row._id}
+                      selected={selected.includes(row.name)}
                       name={row.name}
-                      avatarUrl={row.avatarUrl}
                       roleName={row.role}
                       email={row.email}
-                      isVerified={row.isVerified}
                       description={row.description}
+                      avatarUrl={"/assets/images/avatars/"+row.avatarUrl}
                       handleClick={handleClick}
-                      refreshUserList={refreshUserList}
                     />
                   ))}
                 <TableEmptyRows emptyRows={emptyRows(page, rowsPerPage, users.length)} />
-                {dataFiltered.length === 0 && <TableNoData />}
+                {notFound && <TableNoData />}
               </TableBody>
             </Table>
           </TableContainer>
@@ -229,6 +217,17 @@ export default function UserPage() {
       <Dialog open={openUserDialog} onClose={handleUserDialogClose}>
         <DialogTitle>Add New User</DialogTitle>
         <DialogContent>
+          {/* Avatar Selection Button */}
+          <IconButton onClick={handleAvatarClickOpen} sx={{ margin: 'auto', display: 'block' }}>
+            <Avatar
+              src={newUser.avatarUrl ? `/assets/images/avatars/${newUser.avatarUrl}` : defaultAvatar}
+              alt="Avatar"
+              sx={{ width: 64, height: 64 }}
+            />
+          </IconButton>
+
+
+          {/* User Information Fields */}
           <TextField
             autoFocus
             margin="dense"
@@ -276,6 +275,24 @@ export default function UserPage() {
           <Button onClick={handleSubmitUser}>Submit</Button>
         </DialogActions>
       </Dialog>
-    </Container>
+      {/* Avatar Selection Dialog */}
+      <Dialog open={openAvatarSelector} onClose={handleAvatarClose}>
+        <DialogTitle>Select Avatar</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2}>
+            {avatarOptions.map((avatar, index) => (
+              <Grid item xs={4} key={index}>
+                <IconButton onClick={() => handleAvatarSelect(avatar)} style={{ padding: 0 }}>
+                  <img src={`/assets/images/avatars/${avatar}`} alt={`Avatar ${index + 1}`} style={{ width: 64, height: 64, borderRadius: '50%' }} />
+                </IconButton>
+              </Grid>
+            ))}
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAvatarClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+    </Container >
   );
 }
