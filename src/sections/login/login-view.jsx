@@ -44,11 +44,13 @@ export default function LoginView() {
         window.localStorage.setItem("id", response.data.info.id);
         window.localStorage.setItem("name", response.data.info.name);
         window.localStorage.setItem("role", response.data.info.role);
+        window.localStorage.setItem("email", response.data.info.email);
         navigate('/'); // Redirect to the homepage or another route on successful login
       } else {
         window.localStorage.removeItem("id");
         window.localStorage.removeItem("name");
-        window.localStorage.removeItem("role");    
+        window.localStorage.removeItem("role"); 
+        window.localStorage.removeItem("email");      
         setLoginError('Unexpected error occurred. Please try again.'); // Fallback error message
       }
     } catch (error) {
@@ -56,6 +58,7 @@ export default function LoginView() {
       window.localStorage.removeItem("id");
       window.localStorage.removeItem("name");
       window.localStorage.removeItem("role"); 
+      window.localStorage.removeItem("email");      
       setLoginError(error.response?.data?.error || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
