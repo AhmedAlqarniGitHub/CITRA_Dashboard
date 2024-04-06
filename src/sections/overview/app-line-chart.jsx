@@ -7,7 +7,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
 import {
   Card,
@@ -17,7 +17,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Box
+  Checkbox,
+  ListItemText,
+  Box,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
@@ -37,24 +39,36 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
 }));
 
 const InteractiveLineChart = ({ title, subheader, completeEventData, events, emotions }) => {
-  const [selectedEmotion, setSelectedEmotion] = useState(emotions[0]);
-  const [selectedEvent, setSelectedEvent] = useState(events[0]);
+  // Initialize with the first three or fewer items
+  const [selectedEmotions, setSelectedEmotions] = useState(emotions.slice(0, 3));
+  const [selectedEvents, setSelectedEvents] = useState(events.slice(0, 3));
 
   // Event handler for emotion selection
   const handleEmotionChange = (event) => {
-    setSelectedEmotion(event.target.value);
+    const value = event.target.value;
+    if (value.length <= 3) {
+      setSelectedEmotions(value);
+    }
   };
 
   // Event handler for event name selection
   const handleEventChange = (event) => {
-    setSelectedEvent(event.target.value);
+    const value = event.target.value;
+    if (value.length <= 3) {
+      setSelectedEvents(value);
+    }
   };
 
-  // Transform the dataset for the selected event and emotion
-  const transformedData = completeEventData.map(monthData => ({
-    month: monthData.month,
-    count: monthData[selectedEvent][selectedEmotion],
-  }));
+  // Transform the dataset for the selected events and emotions
+  const transformedData = completeEventData.map((monthData) => {
+    let count = 0;
+    selectedEvents.forEach((event) => {
+      selectedEmotions.forEach((emotion) => {
+        count += monthData[event][emotion];
+      });
+    });
+    return { month: monthData.month, count };
+  });
 
   return (
     <Card style={{ height: '100%' }}>
@@ -75,13 +89,15 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
             <InputLabel id="emotion-label">Emotion</InputLabel>
             <Select
               labelId="emotion-label"
-              value={selectedEmotion}
+              multiple
+              value={selectedEmotions}
               onChange={handleEmotionChange}
-              label="Emotion"
+              renderValue={(selected) => selected.join(', ')}
             >
               {emotions.map((emotion) => (
                 <MenuItem key={emotion} value={emotion}>
-                  {emotion}
+                  <Checkbox checked={selectedEmotions.indexOf(emotion) > -1} />
+                  <ListItemText primary={emotion} />
                 </MenuItem>
               ))}
             </Select>
@@ -90,13 +106,15 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
             <InputLabel id="event-label">Event</InputLabel>
             <Select
               labelId="event-label"
-              value={selectedEvent}
+              multiple
+              value={selectedEvents}
               onChange={handleEventChange}
-              label="Event"
+              renderValue={(selected) => selected.join(', ')}
             >
               {events.map((event) => (
                 <MenuItem key={event} value={event}>
-                  {event}
+                  <Checkbox checked={selectedEvents.indexOf(event) > -1} />
+                  <ListItemText primary={event} />
                 </MenuItem>
               ))}
             </Select>

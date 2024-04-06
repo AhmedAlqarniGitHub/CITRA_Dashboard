@@ -43,7 +43,7 @@ const AppSatisfactionGauge = ({ title }) => {
   return (
     <Card style={{ height: '100%' }}>
       <CardHeader title={title} />
-      <div style={{ padding: '20px' }}>
+      <div style={{ padding: '20px' , paddingTop:"2.5vh"}} >
         <Select
           value={selectedEvent}
           onChange={handleEventChange}
