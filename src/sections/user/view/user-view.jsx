@@ -49,8 +49,11 @@ export default function UserPage() {
   }, []);
 
   const refreshUserList = () => {
+    let user = {
+      id: localStorage.getItem('id'),
+    };
     axios
-      .get(`${apiBaseUrl}/users/all`)
+      .get(`${apiBaseUrl}/users/all/${user.id}`)
       .then((response) => {
         setUsers(response.data);
       })
@@ -136,6 +139,9 @@ export default function UserPage() {
       description: newUser.description,
     };
     try {
+      let user = {
+        id: localStorage.getItem('id'),
+      };
       const response = await axios.post(`${apiBaseUrl}/users/register`, userData);
       console.log(response.data);
       refreshUserList();

@@ -42,7 +42,7 @@ export default function EventPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [open, setOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
-    organizer: '660720849045c0664e4cb45e',//temp
+    organizer: '660720849045c0664e4cb45e', //temp
     eventName: '',
     description: '',
     startDate: '',
@@ -51,10 +51,12 @@ export default function EventPage() {
     status: 'active',
   });
 
-
   useEffect(() => {
+    let user = {
+      id: localStorage.getItem('id'),
+    };
     axios
-      .get(`${apiBaseUrl}/events/all`)
+      .get(`${apiBaseUrl}/events/all/${user.id}`)
       .then((response) => {
         setEvents(response.data);
         setError('');
@@ -70,7 +72,10 @@ export default function EventPage() {
   const refreshEventList = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${apiBaseUrl}/events/all`);
+      let user = {
+        id: localStorage.getItem('id'),
+      };
+      const response = await axios.get(`${apiBaseUrl}/events/all/${user.id}`);
       setEvents(response.data);
       setError('');
     } catch (error) {
@@ -117,7 +122,6 @@ export default function EventPage() {
     filterName,
   });
 
-
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -137,7 +141,7 @@ export default function EventPage() {
 
   const handleSubmit = async () => {
     try {
-      // Sending `newEvent` to your server's 'events/register' endpoint 
+      // Sending `newEvent` to your server's 'events/register' endpoint
       const eventData = {
         name: newEvent.eventName, // Make sure this is a string
         location: newEvent.location, // Make sure this is a string
@@ -147,7 +151,10 @@ export default function EventPage() {
         organizer: '5f50c31b892b3c6e2fae6e8b', // This should be the actual organizer ObjectId from your state/context
         status: newEvent.status, // This should be 'active' or 'inactive'
       };
-      const response = await axios.post('http://localhost:3000/events/register', eventData);
+      let user = {
+        id: localStorage.getItem('id'),
+      };
+      const response = await axios.post('http://localhost:3000/events/register',eventData);
       console.log(response.data);
       // If you need to do something with the response data, you can do it here
       handleClose(); // Close the dialog upon successful submission
@@ -161,8 +168,6 @@ export default function EventPage() {
     }
   };
 
-
-
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, dataFiltered.length - page * rowsPerPage);
 
   return (
@@ -170,11 +175,14 @@ export default function EventPage() {
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4">Events</Typography>
-          <Button variant="contained" color="inherit"
-            startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleClickOpen}>
+          <Button
+            variant="contained"
+            color="inherit"
+            startIcon={<Iconify icon="eva:plus-fill" />}
+            onClick={handleClickOpen}
+          >
             New Event
           </Button>
-
         </Stack>
 
         <Card>
@@ -236,8 +244,6 @@ export default function EventPage() {
                   ) : (
                     <TableNoData query={filterName} />
                   )}
-
-
                 </TableBody>
               </Table>
             </TableContainer>
@@ -318,22 +324,9 @@ export default function EventPage() {
           />
           <FormControl component="fieldset" margin="dense">
             <FormLabel component="legend">Status</FormLabel>
-            <RadioGroup
-              row
-              name="status"
-              value={newEvent.status}
-              onChange={handleChange}
-            >
-              <FormControlLabel
-                value="active"
-                control={<Radio />}
-                label="Active"
-              />
-              <FormControlLabel
-                value="inactive"
-                control={<Radio />}
-                label="Inactive"
-              />
+            <RadioGroup row name="status" value={newEvent.status} onChange={handleChange}>
+              <FormControlLabel value="active" control={<Radio />} label="Active" />
+              <FormControlLabel value="inactive" control={<Radio />} label="Inactive" />
             </RadioGroup>
           </FormControl>
           {/* Add more fields if necessary */}
@@ -343,8 +336,6 @@ export default function EventPage() {
           <Button onClick={handleSubmit}>Submit</Button>
         </DialogActions>
       </Dialog>
-
     </>
-
   );
 }

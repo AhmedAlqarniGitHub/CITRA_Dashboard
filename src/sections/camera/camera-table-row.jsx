@@ -78,7 +78,12 @@ export default function CameraTableRow({
     };
 
     try {
-      await axios.patch(`${apiBaseUrl}/cameras/update/${id}`, cameraToUpdate);
+      let user = {
+        id: localStorage.getItem("id"),
+      }
+      await axios.patch(`${apiBaseUrl}/cameras/update/${id}/${user.id}`, 
+        cameraToUpdate
+      );
       setIsEditMode(false);
       refreshCameraList();
     } catch (error) {
@@ -93,7 +98,10 @@ export default function CameraTableRow({
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`${apiBaseUrl}/cameras/remove/${id}`);
+      let user = {
+        id: localStorage.getItem('id'),
+      };
+      await axios.delete(`${apiBaseUrl}/cameras/remove/${id}/${user.id}`);
       refreshCameraList();
       setDeleteDialogOpen(false);
     } catch (error) {

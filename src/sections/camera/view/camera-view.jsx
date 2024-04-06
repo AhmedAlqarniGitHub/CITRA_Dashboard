@@ -60,8 +60,11 @@ export default function CameraPage() {
   }, []);
 
   const refreshCameraList = () => {
+    let user = {
+      id: localStorage.getItem('id'),
+    };
     axios
-      .get(`${apiBaseUrl}/cameras/all`)
+      .get(`${apiBaseUrl}/cameras/all/${user.id}`)
       .then((response) => {
         setCameras(response.data);
       })
@@ -79,7 +82,12 @@ export default function CameraPage() {
   const handleSubmitCamera = async () => {
     // Validation logic here...
     try {
-      const response = await axios.post(`${apiBaseUrl}/cameras/add`, newCamera);
+      let user = {
+        id: localStorage.getItem('id'),
+      };
+      const response = await axios.post(`${apiBaseUrl}/cameras/add`, {
+        user: user,
+        ...newCamera});
       console.log(response.data);
       handleCameraDialogClose();
       refreshCameraList(); // Refresh the camera list

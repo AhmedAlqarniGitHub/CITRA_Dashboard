@@ -40,8 +40,12 @@ export default function AppView() {
   useEffect(() => {
     const fetchSummaryData = async () => {
       try {
-        const eventSummaryResponse = await axios.get(`${apiBaseUrl}/events/summary`);
-        const cameraSummaryResponse = await axios.get(`${apiBaseUrl}/cameras/summary`);
+        let user = {
+          id: localStorage.getItem('id'),
+        };
+
+        const eventSummaryResponse = await axios.get(`${apiBaseUrl}/events/summary/${user.id}`);
+        const cameraSummaryResponse = await axios.get(`${apiBaseUrl}/cameras/summary/${user.id}`);
 
         setSummaryData({
           totalEvents: eventSummaryResponse.data.totalEvents,
@@ -56,7 +60,10 @@ export default function AppView() {
 
     const fetchChartData = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/events/charts`);
+        let user = {
+          id: localStorage.getItem('id'),
+        };
+        const response = await axios.get(`${apiBaseUrl}/events/charts/${user.id}`);
         setChartData(response.data);
 
         const fetchedEvents =

@@ -16,6 +16,9 @@ const ProtectedRoute = ({ children }) => {
 };
 
 export default function Router() {
+const isAdmin = localStorage.getItem('role') == 'admin';
+
+
   return useRoutes([
     {
       element: (
@@ -29,9 +32,10 @@ export default function Router() {
       ),
       children: [
         { element: <IndexPage />, index: true },
-        { path: 'user', element: <UserPage /> },
+
         { path: 'event', element: <EventPage /> },
         { path: 'camera', element: <CameraPage /> },
+        isAdmin && { path: 'user', element: <UserPage /> },
         // Define other protected routes here
       ],
     },

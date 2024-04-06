@@ -17,8 +17,13 @@ const AppSatisfactionGauge = ({ title }) => {
   const [selectedSatisfaction, setSelectedSatisfaction] = useState(0);
 
   useEffect(() => {
+
+    const user = {
+      id: localStorage.getItem('id'),
+    };
+
     axios
-      .get(`${apiBaseUrl}/events/satisfaction`)
+      .get(`${apiBaseUrl}/events/satisfaction/${user.id}`)
       .then((response) => {
         setSatisfactionData(response.data);
         if (response.data.length > 0) {

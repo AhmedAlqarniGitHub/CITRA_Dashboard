@@ -45,7 +45,7 @@ export default function LoginView() {
         window.localStorage.setItem("name", response.data.info.name);
         window.localStorage.setItem("role", response.data.info.role);
         window.localStorage.setItem("email", response.data.info.email);
-        navigate('/'); // Redirect to the homepage or another route on successful login
+        window.location.href = '/'; // Redirect to the homepage or another route on successful login
       } else {
         window.localStorage.removeItem("id");
         window.localStorage.removeItem("name");

@@ -87,7 +87,10 @@ export default function UserTableRow({
     };
 
     try {
-      await axios.patch(`${apiBaseUrl}/users/update/${id}`, userToUpdate);
+      let user = {
+        id: localStorage.getItem('id'),
+      };
+      await axios.patch(`${apiBaseUrl}/users/update/${id}/${user.id}`, userToUpdate);
       refreshUserList();
       setIsEditMode(false);
     } catch (error) {
@@ -102,7 +105,10 @@ export default function UserTableRow({
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`${apiBaseUrl}/users/${id}`);
+      let user = {
+        id: localStorage.getItem('id'),
+      };
+      await axios.delete(`${apiBaseUrl}/users/${id}/${user.id}`);
       refreshUserList();
     } catch (error) {
       console.error('Error deleting user:', error);

@@ -13,7 +13,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button
+  Button,
 } from '@mui/material';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -32,7 +32,7 @@ export default function EventTableRow({
   location,
   selected,
   handleClick,
-  refreshEventList
+  refreshEventList,
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -83,36 +83,37 @@ export default function EventTableRow({
   const handleChange = (prop) => (event) => {
     setEditedEvent({ ...editedEvent, [prop]: event.target.value });
   };
-  
 
-const handleSave = async () => {
-  // Add 'organizer' to the editedEvent state if it needs to be editable
-  const eventToUpdate = {
-    name: editedEvent.eventName,
-    description: editedEvent.description,
-    startingDate: new Date(editedEvent.startDate).toISOString(),
-    endingDate: new Date(editedEvent.endDate).toISOString(),
-    location: editedEvent.location,
-    organizer: editedEvent.organizer,
-  };
+  const handleSave = async () => {
+    // Add 'organizer' to the editedEvent state if it needs to be editable
+    const eventToUpdate = {
+      name: editedEvent.eventName,
+      description: editedEvent.description,
+      startingDate: new Date(editedEvent.startDate).toISOString(),
+      endingDate: new Date(editedEvent.endDate).toISOString(),
+      location: editedEvent.location,
+      organizer: editedEvent.organizer,
+    };
 
-  try {
-    const response = await axios.patch(`${apiBaseUrl}/events/update/${id}`, eventToUpdate);
-    console.log('Save edited data:', response.data);
-    refreshEventList();
-    setIsEditMode(false);
-  } catch (error) {
-    console.error('Error saving edited data:', error);
-    // Show validation errors to the user
-    if (error.response && error.response.data.errors) {
-      error.response.data.errors.forEach((err) => {
-        // Display these errors to the user
-        console.error(err.message);
-      });
+    try {
+      let user = {
+        id: localStorage.getItem('id'),
+      };
+      const response = await axios.patch(`${apiBaseUrl}/events/update/${id}/${user.id}`,eventToUpdate);
+      console.log('Save edited data:', response.data);
+      refreshEventList();
+      setIsEditMode(false);
+    } catch (error) {
+      console.error('Error saving edited data:', error);
+      // Show validation errors to the user
+      if (error.response && error.response.data.errors) {
+        error.response.data.errors.forEach((err) => {
+          // Display these errors to the user
+          console.error(err.message);
+        });
+      }
     }
-  }
-};
-
+  };
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -123,7 +124,10 @@ const handleSave = async () => {
 
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`${apiBaseUrl}/events/${id}`);
+      let user = {
+        id: localStorage.getItem('id'),
+      };
+      const response = await axios.delete(`${apiBaseUrl}/events/${id}/${user.id}`);
       console.log('Delete response:', response.data);
       refreshEventList();
     } catch (error) {
@@ -136,7 +140,6 @@ const handleSave = async () => {
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
   };
-
 
   return (
     <TableRow hover tabIndex={-1} selected={selected}>
