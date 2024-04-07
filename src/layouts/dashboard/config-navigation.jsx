@@ -34,6 +34,12 @@ const navConfig = [
       path: '/camera',
       icon: icon('ic_camera'),
     },
+    {
+      title: 'Insightful Actions',
+      path: '/actions',
+      icon: icon('ic_camera'),
+    },
+
   );
 
 export default navConfig;

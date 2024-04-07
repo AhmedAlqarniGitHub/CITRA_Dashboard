@@ -3,7 +3,7 @@ import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 import DashboardLayout from 'src/layouts/dashboard';
 
 const IndexPage = lazy(() => import('src/pages/app'));
-const BlogPage = lazy(() => import('src/pages/blog'));
+const ActionsPage = lazy(() => import('src/pages/actions'));
 const UserPage = lazy(() => import('src/pages/user'));
 const EventPage = lazy(() => import('src/pages/event'));
 const CameraPage = lazy(() => import('src/pages/camera'));
@@ -35,6 +35,7 @@ const isAdmin = localStorage.getItem('role') == 'admin';
 
         { path: 'event', element: <EventPage /> },
         { path: 'camera', element: <CameraPage /> },
+        { path: 'actions', element: <ActionsPage /> },
         isAdmin && { path: 'user', element: <UserPage /> },
         // Define other protected routes here
       ],
