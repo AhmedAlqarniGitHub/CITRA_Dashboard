@@ -33,11 +33,11 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
         alt="icon"
         src="/assets/logo.svg"
         style={{
-            width: '45px', // Replace 'desiredWidth' with the actual width value, e.g., '100px' or '10rem'
-            height: '45px', // Replace 'desiredHeight' with the actual height value, e.g., '100px' or '10rem'
+            width: '55px', // Replace 'desiredWidth' with the actual width value, e.g., '100px' or '10rem'
+            height: '55px', // Replace 'desiredHeight' with the actual height value, e.g., '100px' or '10rem'
             cursor: 'pointer',
             marginTop:'20px',
-            marginLeft:'20px',
+            marginLeft:'40px',
             ...sx // Assuming you still want to spread the 'sx' styles if they are applicable here
         }}
     />

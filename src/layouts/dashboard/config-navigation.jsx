@@ -17,7 +17,7 @@ const navConfig = [
 
   localStorage.getItem('role') == 'admin'
     ? navConfig.push({
-        title: 'user',
+        title: 'users',
         path: '/user',
         icon: icon('ic_user'),
       })
@@ -25,14 +25,14 @@ const navConfig = [
 
   navConfig.push(
     {
-      title: 'event',
+      title: 'events',
       path: '/event',
       icon: icon('ic_event'),
     },
     {
-      title: 'camera',
+      title: 'cameras',
       path: '/camera',
-      icon: icon('ic_event'),
+      icon: icon('ic_camera'),
     },
   );
 
