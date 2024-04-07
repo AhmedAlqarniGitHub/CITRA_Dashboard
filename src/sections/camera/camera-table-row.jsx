@@ -14,9 +14,12 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
+  Box,
   Stack,
   Typography,
 } from '@mui/material';
+import Label from 'src/components/label';
+
 import Iconify from 'src/components/iconify';
 import axios from 'axios';
 
@@ -27,6 +30,8 @@ export default function CameraTableRow({
   selected,
   manufacturer,
   model,
+  status, // Add this
+  eventName, // Add this
   supportedQuality,
   framesPerSecond,
   handleClick,
@@ -81,13 +86,26 @@ export default function CameraTableRow({
       let user = {
         id: localStorage.getItem("id"),
       }
-      await axios.patch(`${apiBaseUrl}/cameras/update/${id}/${user.id}`, 
+      await axios.patch(`${apiBaseUrl}/cameras/update/${id}/${user.id}`,
         cameraToUpdate
       );
       setIsEditMode(false);
       refreshCameraList();
     } catch (error) {
       console.error('Error saving edited camera:', error);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'available':
+        return 'success.main'; // Use Material-UI theme color for success
+      case 'in-use':
+        return 'warning.main'; // Use Material-UI theme color for warning
+      case 'maintenance':
+        return 'error.main'; // Use Material-UI theme color for error
+      default:
+        return 'grey.500'; // Default color for unknown status
     }
   };
 
@@ -159,6 +177,18 @@ export default function CameraTableRow({
             framesPerSecond
           )}
         </TableCell>
+        <TableCell>
+          <Typography>{eventName ? eventName : "No specified Event"}</Typography>
+        </TableCell>
+        <TableCell>
+          <Label color={
+            status === 'in-use' ? 'info' :
+              status === 'available' ? 'success' :
+                'error'
+          }>
+            {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Not recognized"}
+          </Label>
+        </TableCell>
 
         <TableCell align="right">
           {isEditMode ? (
@@ -223,4 +253,6 @@ CameraTableRow.propTypes = {
   framesPerSecond: PropTypes.number.isRequired,
   handleClick: PropTypes.func.isRequired,
   refreshCameraList: PropTypes.func.isRequired,
+  eventName: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
 };

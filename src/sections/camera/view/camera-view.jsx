@@ -14,6 +14,11 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import { cameras } from 'src/_mock/camera';
@@ -51,7 +56,10 @@ export default function CameraPage() {
     model: '',
     supportedQuality: '1080p', // Default quality
     framesPerSecond: 30, // Default FPS
+    status: 'available', // Default status
+    eventName:''
   });
+
 
   const [cameras, setCameras] = useState([]);
 
@@ -80,22 +88,19 @@ export default function CameraPage() {
   };
 
   const handleSubmitCamera = async () => {
-    // Validation logic here...
     try {
-      let user = {
-        id: localStorage.getItem('id'),
-      };
-      const response = await axios.post(`${apiBaseUrl}/cameras/add`, {
-        user: user,
-        ...newCamera});
+      newCamera.id = window.localStorage.getItem('id')
+      const response = await axios.post(`${apiBaseUrl}/cameras/add`, newCamera);
       console.log(response.data);
       handleCameraDialogClose();
-      refreshCameraList(); // Refresh the camera list
+      refreshCameraList();
     } catch (error) {
       console.error('Error adding camera:', error);
-      // Show error feedback...
     }
   };
+
+
+
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -192,6 +197,8 @@ export default function CameraPage() {
                   { id: 'model', label: 'Model' },
                   { id: 'supportedQuality', label: 'Quality' },
                   { id: 'framesPerSecond', label: 'FPS' },
+                  { id: 'status', label: 'Status' }, // Added status
+                  { id: 'eventName', label: 'Event Name' }, // Added event name
                 ]}
               />
               <TableBody>
@@ -199,16 +206,17 @@ export default function CameraPage() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((camera) => (
                     <CameraTableRow
-                      key={camera._id} // Unique key for each row
+                      key={camera._id}
                       id={camera._id}
                       selected={selected.indexOf(camera.id) !== -1}
                       handleClick={(event) => handleClick(event, camera.id)}
-                      manufacturer={camera.manufacturer} // Correctly pass manufacturer info
-                      model={camera.model || camera.name} // Correctly pass model name
-                      supportedQuality={camera.supportedQuality} // Pass quality info
-                      framesPerSecond={camera.framesPerSecond} // Ensure FPS data is passed
-                      status={camera.status} // Assuming you have a 'status' field in your camera objects
-                      refreshCameraList={refreshCameraList} // Add this to refresh the list after update/delete
+                      manufacturer={camera.manufacturer}
+                      model={camera.model}
+                      supportedQuality={camera.supportedQuality}
+                      framesPerSecond={camera.framesPerSecond}
+                      status={camera.status} // Pass the status
+                      eventName={camera.eventName} // Pass the event name
+                      refreshCameraList={refreshCameraList}
                     />
                   ))}
 
@@ -284,6 +292,21 @@ export default function CameraPage() {
             <MenuItem value={60}>60 FPS (Smooth)</MenuItem>
             <MenuItem value={120}>120 FPS (High Frame Rate)</MenuItem>
           </TextField>
+
+          <FormControl component="fieldset" margin="dense">
+            <FormLabel component="legend">Status</FormLabel>
+            <RadioGroup
+              row
+              name="status"
+              value={newCamera.status}
+              onChange={handleCameraChange}
+            >
+              <FormControlLabel value="available" control={<Radio />} label="Available" />
+              <FormControlLabel value="in-use" control={<Radio />} label="In Use" />
+              <FormControlLabel value="maintenance" control={<Radio />} label="Maintenance" />
+            </RadioGroup>
+          </FormControl>
+
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCameraDialogClose}>Cancel</Button>

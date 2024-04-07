@@ -21,7 +21,6 @@ import axios from 'axios';
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function EventTableRow({
-  id,
   eventId,
   organizer,
   eventName,
@@ -147,8 +146,7 @@ export default function EventTableRow({
         <Checkbox checked={selected} onChange={(event) => handleClick(event, id)} />
       </TableCell>
 
-      {/* Event ID is not editable */}
-      <TableCell>{eventId}</TableCell>
+  
 
       {isEditMode ? (
         <>
@@ -216,7 +214,7 @@ export default function EventTableRow({
       </TableCell>
 
       {/* Action buttons */}
-      <TableCell>
+      <TableCell align="right">
         {isEditMode ? (
           <>
             <IconButton onClick={handleSave} color="primary">

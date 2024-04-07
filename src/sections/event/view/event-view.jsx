@@ -19,6 +19,10 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import Checkbox from '@mui/material/Checkbox';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import EventTableHead from '../event-table-head';
@@ -41,15 +45,19 @@ export default function EventPage() {
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [open, setOpen] = useState(false);
+  const [availableCameras, setAvailableCameras] = useState([]);
+
   const [newEvent, setNewEvent] = useState({
-    organizer: '', 
+    organizer: '',
     eventName: '',
     description: '',
     startDate: '',
     endDate: '',
     location: '',
     status: 'active',
+    cameras: [], // This will hold selected camera IDs
   });
+
 
   useEffect(() => {
     let user = {
@@ -82,6 +90,17 @@ export default function EventPage() {
       setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+
+  const fetchAvailableCameras = async () => {
+    try {
+      const userId = localStorage.getItem('id'); // or however you store/retrieve the current user's ID
+      const response = await axios.get(`${apiBaseUrl}/cameras/available/${userId}`);
+      setAvailableCameras(response.data);
+    } catch (error) {
+      console.error('Error fetching available cameras:', error);
     }
   };
 
@@ -123,50 +142,62 @@ export default function EventPage() {
   });
 
   const handleClickOpen = () => {
+    fetchAvailableCameras(); // Fetch cameras when dialog is opened
     setOpen(true);
   };
+
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    const val = type === 'radio' ? e.target.getAttribute('value') : value;
-    setNewEvent((prev) => ({
-      ...prev,
-      [name]: val,
-    }));
+
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Adjust according to your needs
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+  
+    if (name === "cameras") {
+      // For a multi-select, the value is an array
+      setNewEvent((prev) => ({
+        ...prev,
+        [name]: typeof value === 'string' ? value.split(',') : value,
+      }));
+    } else {
+      setNewEvent((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+  
+
 
   const handleSubmit = async () => {
     try {
-      // Sending `newEvent` to your server's 'events/register' endpoint
       const eventData = {
-        name: newEvent.eventName, // Make sure this is a string
-        location: newEvent.location, // Make sure this is a string
-        startingDate: new Date(newEvent.startDate).toISOString(), // Convert to ISO 8601
-        endingDate: new Date(newEvent.endDate).toISOString(), // Convert to ISO 8601
-        description: newEvent.description, // Make sure this is a string
-        organizer: window.localStorage.getItem('id'), // This should be the actual organizer ObjectId from your state/context
-        status: newEvent.status, // This should be 'active' or 'inactive'
+        name: newEvent.eventName,
+        location: newEvent.location,
+        startingDate: new Date(newEvent.startDate).toISOString(),
+        endingDate: new Date(newEvent.endDate).toISOString(),
+        description: newEvent.description,
+        organizer: window.localStorage.getItem('id'),
+        status: newEvent.status,
+        cameras: newEvent.cameras, // Include the selected cameras
       };
-      let user = {
-        id: localStorage.getItem('id'),
-      };
-      const response = await axios.post('http://localhost:3000/events/register',eventData);
+  
+      const response = await axios.post(`${apiBaseUrl}/events/register`, eventData);
       console.log(response.data);
-      // If you need to do something with the response data, you can do it here
-      handleClose(); // Close the dialog upon successful submission
-      // Optionally, refresh the events list or display a success message
-      refreshEventList(); // if you have a function to refresh the event list
-      // showSnackbar('Event successfully created', 'success'); // if you have a notification system
+      handleClose();
+      refreshEventList();
     } catch (error) {
-      // Handle the error accordingly, possibly showing an error message to the user
       console.error('There was an error submitting the form', error);
-      // showSnackbar('Error submitting event', 'error'); // if you have a notification system
     }
   };
+  
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, dataFiltered.length - page * rowsPerPage);
 
@@ -203,7 +234,6 @@ export default function EventPage() {
                   onRequestSort={handleRequestSort}
                   onSelectAllClick={handleSelectAllClick}
                   headLabel={[
-                    { id: 'eventId', label: 'Event ID', align: 'left' },
                     { id: 'eventName', label: 'Event Name', align: 'left' },
                     { id: 'description', label: 'Description', align: 'left' },
                     { id: 'startDate', label: 'Start Date', align: 'left' },
@@ -230,10 +260,9 @@ export default function EventPage() {
                           eventName={row.name}
                           organizer={row.organizer}
                           eventId={row._id}
-                          id={row._id}
                           description={row.description}
-                          startDate={row.startingDate}
-                          endDate={row.endingDate}
+                          startDate={formatDate(row.startingDate)} // Format the starting date
+                          endDate={formatDate(row.endingDate)} // Format the ending date
                           status={row.status.charAt(0).toUpperCase() + row.status.slice(1)}
                           location={row.location}
                           selected={selected.includes(row._id)}
@@ -322,6 +351,25 @@ export default function EventPage() {
             value={newEvent.location}
             onChange={handleChange}
           />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Available Cameras</InputLabel>
+            <Select
+              multiple
+              name="cameras"
+              value={newEvent.cameras}
+              onChange={handleChange}
+              renderValue={(selected) => selected.join(', ')}
+            >
+              {availableCameras.map((camera) => (
+                <MenuItem key={camera._id} value={camera._id}>
+                  <Checkbox checked={newEvent.cameras.indexOf(camera._id) > -1} />
+                  {`${camera.manufacturer} ${camera.model}`}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+
           <FormControl component="fieldset" margin="dense">
             <FormLabel component="legend">Status</FormLabel>
             <RadioGroup row name="status" value={newEvent.status} onChange={handleChange}>
