@@ -67,7 +67,7 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={account.photoURL}
+          src={window.localStorage.getItem("avatarUrl")?"/assets/images/avatars/"+window.localStorage.getItem("avatarUrl"):account.photoURL}
           alt={window.localStorage.getItem("name")||account.displayName}
           sx={{
             width: 36,
