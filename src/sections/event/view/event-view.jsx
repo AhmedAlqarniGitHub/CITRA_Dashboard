@@ -153,10 +153,7 @@ export default function EventPage() {
 
 
 
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Adjust according to your needs
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
   
@@ -261,8 +258,8 @@ export default function EventPage() {
                           organizer={row.organizer}
                           eventId={row._id}
                           description={row.description}
-                          startDate={formatDate(row.startingDate)} // Format the starting date
-                          endDate={formatDate(row.endingDate)} // Format the ending date
+                          startDate={row.startingDate} // Format the starting date
+                          endDate={row.endingDate} // Format the ending date
                           status={row.status.charAt(0).toUpperCase() + row.status.slice(1)}
                           location={row.location}
                           selected={selected.includes(row._id)}

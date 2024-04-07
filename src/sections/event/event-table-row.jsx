@@ -20,6 +20,10 @@ import Iconify from 'src/components/iconify';
 import axios from 'axios';
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Adjust according to your needs
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
 export default function EventTableRow({
   eventId,
   organizer,
@@ -38,8 +42,8 @@ export default function EventTableRow({
   const [editedEvent, setEditedEvent] = useState({
     eventName,
     description,
-    startDate: startDate.split('T')[0], // Adjusting date format for picker
-    endDate: endDate.split('T')[0], // Adjusting date format for picker
+    startDate: startDate, // Adjusting date format for picker
+    endDate: endDate, // Adjusting date format for picker
     location,
     organizer,
   });
@@ -98,7 +102,10 @@ export default function EventTableRow({
       let user = {
         id: localStorage.getItem('id'),
       };
-      const response = await axios.patch(`${apiBaseUrl}/events/update/${id}/${user.id}`,eventToUpdate);
+      const response = await axios.patch(
+        `${apiBaseUrl}/events/update/${eventId}/${user.id}`,
+        eventToUpdate
+      );
       console.log('Save edited data:', response.data);
       refreshEventList();
       setIsEditMode(false);
@@ -126,7 +133,7 @@ export default function EventTableRow({
       let user = {
         id: localStorage.getItem('id'),
       };
-      const response = await axios.delete(`${apiBaseUrl}/events/${id}/${user.id}`);
+      const response = await axios.delete(`${apiBaseUrl}/events/${eventId}/${user.id}`);
       console.log('Delete response:', response.data);
       refreshEventList();
     } catch (error) {
@@ -145,8 +152,6 @@ export default function EventTableRow({
       <TableCell padding="checkbox">
         <Checkbox checked={selected} onChange={(event) => handleClick(event, id)} />
       </TableCell>
-
-  
 
       {isEditMode ? (
         <>
@@ -202,8 +207,8 @@ export default function EventTableRow({
         <>
           <TableCell>{eventName}</TableCell>
           <TableCell>{description}</TableCell>
-          <TableCell>{startDate}</TableCell>
-          <TableCell>{endDate}</TableCell>
+          <TableCell>{formatDate(startDate)}</TableCell>
+          <TableCell>{formatDate(endDate)}</TableCell>
           <TableCell>{location}</TableCell>
         </>
       )}
@@ -267,7 +272,6 @@ export default function EventTableRow({
 }
 
 EventTableRow.propTypes = {
-  id: PropTypes.string.isRequired,
   eventName: PropTypes.string.isRequired,
   eventId: PropTypes.string.isRequired,
   description: PropTypes.string,

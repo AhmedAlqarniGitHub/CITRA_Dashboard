@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   BarChart,
@@ -25,10 +25,20 @@ const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartS
   const eventNames = dataset.map((item) => item.event);
 
   // State for selected events
-  const [selectedEvents, setSelectedEvents] = useState(eventNames.slice(0, 3));
+  const [selectedEvents, setSelectedEvents] = useState([]);
+
+  // Extract event names from dataset and set initial selected events
+  useEffect(() => {
+    const eventNames = dataset.map((item) => item.event);
+    setSelectedEvents(eventNames.slice(0, 3));
+  }, [dataset]); // Only re-run when dataset changes
 
   const handleEventChange = (event) => {
     const value = event.target.value;
+    console.log(eventNames);
+    console.log(eventNames.length);
+    console.log(selectedEvents);
+    console.log(value);
     // Limit to a maximum of 3 selected events
     if (value.length <= 3) {
       setSelectedEvents(value);
@@ -36,7 +46,9 @@ const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartS
   };
 
   // Filter the dataset based on selected events
-  const filteredDataset = dataset.filter((item) => selectedEvents.includes(item.event));
+  const filteredDataset = dataset.filter((item) => {
+    return selectedEvents.includes(item.event);
+  });
 
   return (
     <Card style={{ height: '100%' }}>
@@ -60,7 +72,7 @@ const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartS
           </Select>
         </FormControl>
       </Box>
-      <ResponsiveContainer width="100%" height="66%">
+      <ResponsiveContainer width="95%" height="66%">
         <BarChart data={filteredDataset} layout="vertical" {...chartSetting}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" />

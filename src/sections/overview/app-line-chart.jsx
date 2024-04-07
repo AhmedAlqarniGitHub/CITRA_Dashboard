@@ -46,9 +46,9 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
   // Event handler for emotion selection
   const handleEmotionChange = (event) => {
     const value = event.target.value;
-    if (value.length <= 3) {
+    // if (value.length <= 3) {
       setSelectedEmotions(value);
-    }
+    // }
   };
 
   // Event handler for event name selection
@@ -73,7 +73,7 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
   return (
     <Card style={{ height: '100%' }}>
       <CardHeader title={title} subheader={subheader} />
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="95%" height={400}>
         <LineChart data={transformedData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
