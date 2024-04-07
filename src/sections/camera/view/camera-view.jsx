@@ -193,8 +193,8 @@ export default function CameraPage() {
                 onRequestSort={handleSort}
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
-                  { id: 'manufacturer', label: 'Manufacturer' },
                   { id: 'model', label: 'Model' },
+                  { id: 'manufacturer', label: 'Manufacturer' },
                   { id: 'supportedQuality', label: 'Quality' },
                   { id: 'framesPerSecond', label: 'FPS' },
                   { id: 'status', label: 'Status' }, // Added status

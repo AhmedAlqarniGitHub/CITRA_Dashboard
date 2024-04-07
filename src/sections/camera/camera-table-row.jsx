@@ -16,6 +16,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Typography,
 } from '@mui/material';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -150,11 +151,16 @@ export default function CameraTableRow({
         {isEditMode ? (
           <>
             <TableCell>
-              <TextField value={editedCamera.manufacturer} onChange={handleChange('manufacturer')} fullWidth />
+            <Typography variant="subtitle2" noWrap>
+
+              <TextField value={editedCamera.model} onChange={handleChange('model')} fullWidth />
+              </Typography>
+
             </TableCell>
             <TableCell>
-              <TextField value={editedCamera.model} onChange={handleChange('model')} fullWidth />
+              <TextField value={editedCamera.manufacturer} onChange={handleChange('manufacturer')} fullWidth />
             </TableCell>
+          
             <TableCell>
               <TextField value={editedCamera.supportedQuality} onChange={handleChange('supportedQuality')} fullWidth />
             </TableCell>
@@ -196,8 +202,12 @@ export default function CameraTableRow({
           </>
         ) : (
           <>
-            <TableCell>{manufacturer}</TableCell>
-            <TableCell>{model}</TableCell>
+<TableCell>
+  <Typography variant="subtitle2" noWrap sx={{ fontWeight: 'bold' }}>
+    {model}
+  </Typography>
+</TableCell>            <TableCell>{manufacturer}</TableCell>
+          
             <TableCell>{supportedQuality}</TableCell>
             <TableCell>{framesPerSecond}</TableCell>
             <TableCell>
