@@ -197,8 +197,8 @@ export default function CameraPage() {
                   { id: 'model', label: 'Model' },
                   { id: 'supportedQuality', label: 'Quality' },
                   { id: 'framesPerSecond', label: 'FPS' },
-                  { id: 'status', label: 'Status' }, // Added status
                   { id: 'eventName', label: 'Event Name' }, // Added event name
+                  { id: 'status', label: 'Status' }, // Added status
                 ]}
               />
               <TableBody>
