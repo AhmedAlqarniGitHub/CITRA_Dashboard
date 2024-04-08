@@ -15,7 +15,7 @@ export default function InsightsComponent() {
   const events = Object.keys(completeEventData[0]).filter(key => key !== 'month');
 
   const questions = [
-    "Summarize all-time user emotions in the event",
+    "Summarize all-time user emotions in all the event",
     "Summarize user emotions in a specific month of a specific event",
     "Overall observations for a specific event",
     "Recommendations for the organizer team to improve user satisfaction"
@@ -39,21 +39,24 @@ export default function InsightsComponent() {
 
   const generatePrompt = (question, event, month) => {
 
-    
-   
-    const selectedData= generatePromptForSpecificMonthAndEvent(completeEventData, selectedEvent, selectedMonth)
-    console.log("selectedData: "+ selectedData)
-    switch (question) {
-      case questions[0]:
-        return `Analyze the comprehensive facial emotion detection data across all events and summarize the predominant user emotions observed.`;
-      case questions[1]:
+    console.log("month: ", month, "event: ",event)
+    const questionNumber = questions.indexOf(question) + 1;
+
+
+    const selectedData = generatePromptForSpecificMonthAndEvent(completeEventData, selectedEvent, selectedMonth, questionNumber);
+    console.log("selectedData: ", selectedData)
+    switch (questionNumber) {
+      case 1:
+        return `Analyze the comprehensive facial emotion detection data across all events and summarize the predominant user emotions observed. ,${selectedData}`;
+      case 2:
         return `Given the facial emotion detection data ,${selectedData},for ${event} in ${month}, summarize the predominant user emotions observed during this period. 
         the answer should be in JSON format with the following keys {Event,Month,Visitors emotions: {Happy: ,Neutral: ,Surprised: ,Angry: ,Sad:, Fearful: },"insights: }}
         insights should be as polit points max 5 points and it should based on the data provided which aimed to summarize it `;
-      case questions[2]:
-        return `Review the facial emotion detection data for ${event} and provide a comprehensive overview of the user emotions detected.`;
-      case questions[3]:
-        return `Based on the analysis of facial emotion detection data, suggest actionable recommendations for event organizers to enhance user satisfaction.`;
+      case 3:
+        return `"Based on the facial emotion detection data ${selectedData},for ${event}, analyze the spectrum of emotions exhibited by attendees. Please organize your insights into JSON format with the following structure: {Event, Month: [List of months with data], Visitor Emotions: {Happy, Neutral, Surprised, Angry, Sad, Fearful}, Insights}. The insights should concisely summarize key findings, highlight any month-
+        to-month variations to indicate trends or changes, and propose up to five actionable insights for improvement."`;
+      case 4:
+        return `Based on the analysis of facial emotion detection data, suggest actionable recommendations for event organizers to enhance user satisfaction. ,${selectedData},`;
       default:
         return '';
     }
@@ -61,22 +64,47 @@ export default function InsightsComponent() {
 
 
 
-  const generatePromptForSpecificMonthAndEvent = (eventData, eventName, monthName) => {
-    // Find the specific event data for the selected month
-    const eventMonthData = eventData.find(data => data.month === monthMapping[monthName]);
-    if (!eventMonthData) return '';
-
-    // Extract the event data
-    const specificEventData = eventMonthData[eventName];
-    if (!specificEventData) return '';
-
-    // Convert data to JSON string format
-    return JSON.stringify({
-      event: eventName,
-      month: monthName,
-      user_emotions: specificEventData
-    });
+  const generatePromptForSpecificMonthAndEvent = (eventData, eventName, monthName, questionNumber) => {
+    switch (questionNumber) {
+      case 1:
+      case 4:
+        // For questions 1 and 4, return the complete data as is
+        return JSON.stringify(eventData);
+      case 2:
+        // For question 2, find and return data for the specific month and event
+        const eventMonthData = eventData.find(data => data.month === monthMapping[monthName]);
+        if (!eventMonthData) return '';
+  
+        const specificEventData = eventMonthData[eventName];
+        if (!specificEventData) return '';
+  
+        return JSON.stringify({
+          event: eventName,
+          month: monthName,
+          user_emotions: specificEventData
+        });
+      case 3:
+        // For question 3, aggregate data across all months for the selected event
+        const aggregatedData = eventData.reduce((acc, monthData) => {
+          const monthEventData = monthData[eventName];
+          if (monthEventData) {
+            Object.keys(monthEventData).forEach(emotion => {
+              acc[emotion] = (acc[emotion] || 0) + monthEventData[emotion];
+            });
+          }
+          return acc;
+        }, {});
+  
+        return JSON.stringify({
+          event: eventName,
+          month: "All Months",
+          user_emotions: aggregatedData
+        });
+      default:
+        return '';
+    }
   };
+  
 
 
   const handleGenerateInsights = async () => {
@@ -143,7 +171,8 @@ export default function InsightsComponent() {
               ))}
             </Select>
           </FormControl>
-
+  
+          {/* For Question 2 */}
           {selectedQuestion === questions[1] && (
             <Box>
               <FormControl fullWidth sx={{ mb: 2 }}>
@@ -154,7 +183,7 @@ export default function InsightsComponent() {
                   ))}
                 </Select>
               </FormControl>
-
+  
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Event</InputLabel>
                 <Select value={selectedEvent} onChange={(e) => setSelectedEvent(e.target.value)}>
@@ -165,14 +194,26 @@ export default function InsightsComponent() {
               </FormControl>
             </Box>
           )}
-
+  
+          {/* For Question 3 */}
+          {selectedQuestion === questions[2] && (
+            <Box>
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Event</InputLabel>
+                <Select value={selectedEvent} onChange={(e) => setSelectedEvent(e.target.value)}>
+                  {events.map(event => (
+                    <MenuItem key={event} value={event}>{event}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
+  
           <Button variant="contained" onClick={handleGenerateInsights}>Generate Insights</Button>
-          {response && selectedQuestion === questions[1] ? (
-
+          {response && (selectedQuestion === questions[1] || selectedQuestion === questions[2]) ? (
             <Box sx={{ mt: 2 }}>
               {renderResponse(response)}
             </Box>
-
           ) :
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mt: 2 }}>{response}</Typography>
           }
@@ -180,4 +221,5 @@ export default function InsightsComponent() {
       </Card>
     </Container>
   );
+  
 }
