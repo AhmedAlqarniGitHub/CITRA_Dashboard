@@ -35,10 +35,6 @@ const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartS
 
   const handleEventChange = (event) => {
     const value = event.target.value;
-    console.log(eventNames);
-    console.log(eventNames.length);
-    console.log(selectedEvents);
-    console.log(value);
     // Limit to a maximum of 3 selected events
     if (value.length <= 3) {
       setSelectedEvents(value);

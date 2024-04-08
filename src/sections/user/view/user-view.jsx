@@ -129,7 +129,6 @@ export default function UserPage() {
         id: localStorage.getItem('id'),
       };
       const response = await axios.post(`${apiBaseUrl}/users/register`, userData);
-      console.log(response.data);
       handleUserDialogClose(); // Close dialog upon successful submission
       refreshUserList(); // Refresh the user list
     } catch (error) {

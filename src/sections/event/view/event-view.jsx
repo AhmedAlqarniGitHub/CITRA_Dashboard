@@ -187,7 +187,6 @@ export default function EventPage() {
       };
   
       const response = await axios.post(`${apiBaseUrl}/events/register`, eventData);
-      console.log(response.data);
       handleClose();
       refreshEventList();
     } catch (error) {
