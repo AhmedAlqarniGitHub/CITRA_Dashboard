@@ -10,6 +10,7 @@ import AppCurrentSubject from '../app-current-subject';
 import InteractiveLineChart from '../app-line-chart';
 import AppOrderTimeline from '../app-order-timeline';
 import AppSatisfactionGauge from '../app-satisfaction-guage';
+import EmotionsHeatmapWithSelectors from '../app-emotions-correlations-heatmap';
 
 import axios from 'axios';
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -26,6 +27,7 @@ export default function AppView() {
     totalEmotionsPerEvent: [],
     heatmapData: {},
     appWebsiteVisitsData: {},
+    emotionCorrelationHeatmapData: [],
   });
 
   const [summaryData, setSummaryData] = useState({
@@ -87,6 +89,7 @@ export default function AppView() {
     totalEmotionsPerEvent,
     heatmapData,
     appWebsiteVisitsData,
+    emotionCorrelationHeatmapData,
   } = chartData;
 
   const emotions =
@@ -94,7 +97,7 @@ export default function AppView() {
       ? Object.keys(eventsBarChart[0]).filter((key) => key !== 'event').map(e=>e.toLowerCase())
       : [];
 
-  console.log(emotions);
+  console.log(emotionCorrelationHeatmapData);
 
   // Define colors for each emotion
   const emotionColors = {
@@ -215,6 +218,17 @@ export default function AppView() {
               completeEventData={completeEventData}
               events={events}
               emotions={emotions}
+            />
+          </Grid>
+        )}
+
+        {/* New Emotions Heatmap With Selectors Component */}
+        {emotionCorrelationHeatmapData && (
+          <Grid item xs={12} lg={12} style={chartStyle}>
+            <EmotionsHeatmapWithSelectors
+              title="Emotion Correlation Heatmap"
+              data={emotionCorrelationHeatmapData}
+              events={events} // Pass events list
             />
           </Grid>
         )}
