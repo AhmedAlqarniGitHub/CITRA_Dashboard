@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Container, Typography, Button, MenuItem, FormControl, InputLabel, Select, Card, CardContent } from '@mui/material';
+import { Container, Typography, Button, MenuItem, FormControl, InputLabel, Select, Card, CardContent, Box } from '@mui/material';
 import completeEventData from "../../_mock/event_barChart_cont";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 
 export default function InsightsComponent() {
   const [selectedQuestion, setSelectedQuestion] = useState('');
@@ -22,13 +23,14 @@ export default function InsightsComponent() {
   ];
 
   const handleGenerateInsights = async () => {
-    // Here, you would formulate the prompt based on the selected question, month, and event
-    // For simplicity, the below line is just a placeholder
-    const prompt = `Based on the selected options: Question: ${selectedQuestion}, Month: ${selectedMonth}, Event: ${selectedEvent}`;
+    // Construct the prompt based on selected inputs
+    const prompt = `Given the facial emotion detection data from various events: ${completeEventData} ,${selectedQuestion} ${selectedEvent ? 'for ' + selectedEvent : ''} ${selectedMonth ? 'in ' + selectedMonth : ''}. Provide insights in a structured JSON format.`;
 
     try {
+      
       const res = await axios.post(`${apiBaseUrl}/actions/generate-text`, { prompt });
-      setResponse(res.data); // Assuming the response structure
+      console.log(res.data)
+      setResponse(JSON.stringify(res.data, null, 2)); // Format the JSON response
     } catch (error) {
       console.error('Error generating insights:', error);
     }
@@ -36,63 +38,41 @@ export default function InsightsComponent() {
 
   return (
     <Container maxWidth="md">
-      <Typography variant="h4" gutterBottom>
-        Insights Generator
-      </Typography>
-      
+      <Typography variant="h4" gutterBottom>Insights Generator</Typography>
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Choose a Question</InputLabel>
-            <Select
-              value={selectedQuestion}
-              label="Choose a Question"
-              onChange={(e) => setSelectedQuestion(e.target.value)}
-            >
+            <InputLabel>Question</InputLabel>
+            <Select value={selectedQuestion} onChange={(e) => setSelectedQuestion(e.target.value)}>
               {questions.map((question, index) => (
                 <MenuItem key={index} value={question}>{question}</MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          {selectedQuestion.includes("specific month") && (
-            <>
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel>Month</InputLabel>
-                <Select
-                  value={selectedMonth}
-                  label="Month"
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                >
-                  {months.map((month) => (
-                    <MenuItem key={month} value={month}>{month}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+          <Box sx={{ display: selectedQuestion.includes('specific month') ? 'block' : 'none' }}>
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>Month</InputLabel>
+              <Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                {months.map(month => (
+                  <MenuItem key={month} value={month}>{month}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel>Event</InputLabel>
-                <Select
-                  value={selectedEvent}
-                  label="Event"
-                  onChange={(e) => setSelectedEvent(e.target.value)}
-                >
-                  {events.map((event) => (
-                    <MenuItem key={event} value={event}>{event}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </>
-          )}
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>Event</InputLabel>
+              <Select value={selectedEvent} onChange={(e) => setSelectedEvent(e.target.value)}>
+                {events.map(event => (
+                  <MenuItem key={event} value={event}>{event}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
 
-          <Button variant="contained" onClick={handleGenerateInsights}>
-            Generate Insights
-          </Button>
-
+          <Button variant="contained" onClick={handleGenerateInsights}>Generate Insights</Button>
           {response && (
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mt: 2 }}>
-              {response}
-            </Typography>
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mt: 2 }}>{response}</Typography>
           )}
         </CardContent>
       </Card>
