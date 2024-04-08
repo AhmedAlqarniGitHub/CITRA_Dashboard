@@ -106,7 +106,6 @@ export default function EventTableRow({
         `${apiBaseUrl}/events/update/${eventId}/${user.id}`,
         eventToUpdate
       );
-      console.log('Save edited data:', response.data);
       refreshEventList();
       setIsEditMode(false);
     } catch (error) {

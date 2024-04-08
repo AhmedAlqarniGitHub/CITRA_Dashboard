@@ -91,7 +91,6 @@ export default function CameraPage() {
     try {
       newCamera.id = window.localStorage.getItem('id')
       const response = await axios.post(`${apiBaseUrl}/cameras/add`, newCamera);
-      console.log(response.data);
       handleCameraDialogClose();
       refreshCameraList();
     } catch (error) {
