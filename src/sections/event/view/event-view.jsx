@@ -352,6 +352,7 @@ export default function EventPage() {
             <Select
               multiple
               name="cameras"
+              label="Available Cameras"
               value={newEvent.cameras}
               onChange={handleChange}
               renderValue={(selected) => selected.join(', ')}

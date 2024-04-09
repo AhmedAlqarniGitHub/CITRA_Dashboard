@@ -37,7 +37,7 @@ const navConfig = [
     {
       title: 'Insightful Actions',
       path: '/actions',
-      icon: icon('ic_camera'),
+      icon: icon('ic_actions'),
     },
 
   );

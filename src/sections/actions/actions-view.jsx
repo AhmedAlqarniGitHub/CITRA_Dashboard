@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Container, Typography, Button, MenuItem, FormControl, InputLabel, Select, Card, CardContent, Box, Grid, Paper } from '@mui/material';
+import {
+  Container, Typography, Button, MenuItem, FormControl, InputLabel, Select, Card, CardContent, Box,
+  CircularProgress, Paper
+} from '@mui/material';
 import completeEventData from "../../_mock/event_barChart_cont";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -10,6 +13,8 @@ export default function InsightsComponent() {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedEvent, setSelectedEvent] = useState('');
   const [response, setResponse] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // New state for tracking loading status
+
 
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const events = Object.keys(completeEventData[0]).filter(key => key !== 'month');
@@ -35,33 +40,32 @@ export default function InsightsComponent() {
     "November": "Nov",
     "December": "Dec"
   };
-  
+
 
   const generatePrompt = (question, event, month) => {
     console.log("Month: ", month, "Event: ", event);
     const questionNumber = questions.indexOf(question) + 1;
-  
+
     const selectedData = generatePromptForSpecificMonthAndEvent(completeEventData, selectedEvent, selectedMonth, questionNumber);
-    console.log("SelectedData: ", selectedData);
-  
+
     switch (questionNumber) {
       case 1:
         return `Analyze the comprehensive facial emotion detection data across all events and summarize the predominant user emotions observed. Data: ${selectedData}. Please format your response as follows: { "Predominant_Emo­tions": ["Happy", "Surprised"], "Insights": ["Emotion A is predominant due to...", "An unexpected trend is..."] }.`;
-  
+
       case 2:
         return `Given the facial emotion detection data for ${event} in ${month}: ${selectedData}, summarize the predominant user emotions observed. Ensure your answer is in JSON format with the following keys: { "Event": "${event}", "Month": "${month}", "Visitors Emotions": {"Happy": 0, "Neutral": 0}, "Insights": ["Point 1", "Point 2"] }. Example: { "Event": "Music Festival", "Month": "June", "Visitors Emotions": {"Happy": 120, "Neutral": 50}, "Insights": ["Majority of attendees felt happy", "Neutral emotions were primarily due to waiting times."] }.`;
-  
+
       case 3:
         return `Based on the facial emotion detection data for ${event}, analyze the spectrum of emotions exhibited by attendees across all months. Data: ${selectedData}. Organize your insights into JSON format: { "Event": "${event}", "Emotions_Per_Month": {...}, "Insights": ["Point 1", "Point 2", "Point 3"] }. Example: { "Event": "Art Exhibition", "Emotions_Per_Month": {"January": {"Happy": 100, "Sad": 20}, "February": {"Happy": 150, "Sad": 25}}, "Insights": ["Happiness increased in February", "Sadness remained relatively constant", "Suggest more interactive exhibits to boost positive emotions."] }.`;
-  
+
       case 4:
         return `Based on the analysis of facial emotion detection data, suggest actionable recommendations for event organizers to enhance user satisfaction for ${event}. Consider the data: ${selectedData}. Format your recommendations as follows: { "Event": "${event}", "Recommendations": ["Recommendation 1", "Recommendation 2"] }. Example: { "Event": "Tech Conference", "Recommendations": ["Increase interactive sessions to boost engagement", "Introduce relaxation zones to help attendees recharge."] }. Not you have to answer with the json object only `;
-  
+
       default:
         return '';
     }
   };
-  
+
 
 
 
@@ -75,10 +79,10 @@ export default function InsightsComponent() {
         // For question 2, find and return data for the specific month and event
         const eventMonthData = eventData.find(data => data.month === monthMapping[monthName]);
         if (!eventMonthData) return '';
-  
+
         const specificEventData = eventMonthData[eventName];
         if (!specificEventData) return '';
-  
+
         return JSON.stringify({
           event: eventName,
           month: monthName,
@@ -93,22 +97,23 @@ export default function InsightsComponent() {
           if (!monthEventData) {
             return { [monthName]: {} };
           }
-  
+
           return { [monthName]: monthEventData };
         });
-  
+
         return JSON.stringify(monthlyEmotionsData);
       default:
         return '';
     }
   };
-  
-  
+
+
 
 
   const handleGenerateInsights = async () => {
+    setIsLoading(true); // Start loading
     const prompt = generatePrompt(selectedQuestion, selectedEvent, selectedMonth);
-    console.log("prompt: "+ prompt)
+    console.log("prompt: " + prompt)
     try {
       const res = await axios.post(`${apiBaseUrl}/actions/generate-text`, { prompt });
       console.log(res.data);
@@ -116,24 +121,27 @@ export default function InsightsComponent() {
     } catch (error) {
       console.error('Error generating insights:', error);
     }
+    finally {
+      setIsLoading(false); // Stop loading regardless of the result
+    }
   };
 
   const renderResponse = (response) => {
     let responseData;
-  
+
     try {
       responseData = JSON.parse(response);
     } catch (e) {
       console.error("Couldn't parse the response as JSON:", e);
       return <Typography variant="body1">{response}</Typography>;
     }
-  
+
     return (
       <Paper elevation={2} sx={{ p: 2, mb: 1, bgcolor: 'grey.200' }}>
         {Object.entries(responseData).map(([key, value], index) => {
           // Convert object keys like "Emotions_Per_Month" to a more readable format
           let formattedKey = key.replace(/_/g, ' ').replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
-          
+
           // Check if the value is an object and not an array (arrays are also objects in JavaScript)
           if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
             // It's an object, so we need to render its entries
@@ -184,11 +192,11 @@ export default function InsightsComponent() {
       </Paper>
     );
   };
-  
-  
-  
-  
-  
+
+
+
+
+
 
   return (
     <Container maxWidth="md">
@@ -197,28 +205,28 @@ export default function InsightsComponent() {
         <CardContent>
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Question</InputLabel>
-            <Select value={selectedQuestion} onChange={(e) => setSelectedQuestion(e.target.value)}>
+            <Select label={"Question"} value={selectedQuestion} onChange={(e) => setSelectedQuestion(e.target.value)}>
               {questions.map((question, index) => (
                 <MenuItem key={index} value={question}>{question}</MenuItem>
               ))}
             </Select>
           </FormControl>
-  
+
           {/* For Question 2 */}
           {selectedQuestion === questions[1] && (
             <Box>
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Month</InputLabel>
-                <Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                <Select label={"Month"} value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
                   {months.map(month => (
                     <MenuItem key={month} value={month}>{month}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
-  
+
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Event</InputLabel>
-                <Select value={selectedEvent} onChange={(e) => setSelectedEvent(e.target.value)}>
+                <Select label={"Event"} value={selectedEvent} onChange={(e) => setSelectedEvent(e.target.value)}>
                   {events.map(event => (
                     <MenuItem key={event} value={event}>{event}</MenuItem>
                   ))}
@@ -226,13 +234,13 @@ export default function InsightsComponent() {
               </FormControl>
             </Box>
           )}
-  
+
           {/* For Question 3 */}
           {selectedQuestion === questions[2] && (
             <Box>
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Event</InputLabel>
-                <Select value={selectedEvent} onChange={(e) => setSelectedEvent(e.target.value)}>
+                <Select label={"Event"} value={selectedEvent} onChange={(e) => setSelectedEvent(e.target.value)}>
                   {events.map(event => (
                     <MenuItem key={event} value={event}>{event}</MenuItem>
                   ))}
@@ -240,16 +248,23 @@ export default function InsightsComponent() {
               </FormControl>
             </Box>
           )}
-  
-          <Button variant="contained" onClick={handleGenerateInsights}>Generate Insights</Button>
-          {response &&
+
+          <Button variant="contained" onClick={handleGenerateInsights} disabled={isLoading}>
+            Generate Insights
+          </Button>
+          {isLoading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
+              <CircularProgress /> {/* Loading spinner */}
+            </Box>
+          )}
+          {!isLoading && response && (
             <Box sx={{ mt: 2 }}>
               {renderResponse(response)}
             </Box>
-                    }
+          )}
         </CardContent>
       </Card>
     </Container>
   );
-  
+
 }
