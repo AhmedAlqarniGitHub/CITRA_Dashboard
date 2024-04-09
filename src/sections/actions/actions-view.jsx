@@ -38,29 +38,30 @@ export default function InsightsComponent() {
   
 
   const generatePrompt = (question, event, month) => {
-
-    console.log("month: ", month, "event: ",event)
+    console.log("Month: ", month, "Event: ", event);
     const questionNumber = questions.indexOf(question) + 1;
-
-
+  
     const selectedData = generatePromptForSpecificMonthAndEvent(completeEventData, selectedEvent, selectedMonth, questionNumber);
-    console.log("selectedData: ", selectedData)
+    console.log("SelectedData: ", selectedData);
+  
     switch (questionNumber) {
       case 1:
-        return `Analyze the comprehensive facial emotion detection data across all events and summarize the predominant user emotions observed. ,${selectedData}`;
+        return `Analyze the comprehensive facial emotion detection data across all events and summarize the predominant user emotions observed. Data: ${selectedData}. Please format your response as follows: { "Predominant_Emo­tions": ["Happy", "Surprised"], "Insights": ["Emotion A is predominant due to...", "An unexpected trend is..."] }.`;
+  
       case 2:
-        return `Given the facial emotion detection data ,${selectedData},for ${event} in ${month}, summarize the predominant user emotions observed during this period. 
-        the answer should be in JSON format with the following keys {Event,Month,Visitors emotions: {Happy: ,Neutral: ,Surprised: ,Angry: ,Sad:, Fearful: },"insights: }}
-        insights should be as polit points max 5 points and it should based on the data provided which aimed to summarize it `;
+        return `Given the facial emotion detection data for ${event} in ${month}: ${selectedData}, summarize the predominant user emotions observed. Ensure your answer is in JSON format with the following keys: { "Event": "${event}", "Month": "${month}", "Visitors Emotions": {"Happy": 0, "Neutral": 0}, "Insights": ["Point 1", "Point 2"] }. Example: { "Event": "Music Festival", "Month": "June", "Visitors Emotions": {"Happy": 120, "Neutral": 50}, "Insights": ["Majority of attendees felt happy", "Neutral emotions were primarily due to waiting times."] }.`;
+  
       case 3:
-        return `"Based on the facial emotion detection data ${selectedData},for ${event}, analyze the spectrum of emotions exhibited by attendees. Please organize your insights into JSON format with the following structure: {Event, Month: [List of months with data], Visitor Emotions: {Happy, Neutral, Surprised, Angry, Sad, Fearful}, Insights}. The insights should concisely summarize key findings, highlight any month-
-        to-month variations to indicate trends or changes, and propose up to five actionable insights for improvement."`;
+        return `Based on the facial emotion detection data for ${event}, analyze the spectrum of emotions exhibited by attendees across all months. Data: ${selectedData}. Organize your insights into JSON format: { "Event": "${event}", "Emotions_Per_Month": {...}, "Insights": ["Point 1", "Point 2", "Point 3"] }. Example: { "Event": "Art Exhibition", "Emotions_Per_Month": {"January": {"Happy": 100, "Sad": 20}, "February": {"Happy": 150, "Sad": 25}}, "Insights": ["Happiness increased in February", "Sadness remained relatively constant", "Suggest more interactive exhibits to boost positive emotions."] }.`;
+  
       case 4:
-        return `Based on the analysis of facial emotion detection data, suggest actionable recommendations for event organizers to enhance user satisfaction. ,${selectedData},`;
+        return `Based on the analysis of facial emotion detection data, suggest actionable recommendations for event organizers to enhance user satisfaction for ${event}. Consider the data: ${selectedData}. Format your recommendations as follows: { "Event": "${event}", "Recommendations": ["Recommendation 1", "Recommendation 2"] }. Example: { "Event": "Tech Conference", "Recommendations": ["Increase interactive sessions to boost engagement", "Introduce relaxation zones to help attendees recharge."] }. Not you have to answer with the json object only `;
+  
       default:
         return '';
     }
   };
+  
 
 
 
@@ -84,26 +85,24 @@ export default function InsightsComponent() {
           user_emotions: specificEventData
         });
       case 3:
-        // For question 3, aggregate data across all months for the selected event
-        const aggregatedData = eventData.reduce((acc, monthData) => {
+        // For question 3, create an array with emotions for each month for the selected event
+        const monthlyEmotionsData = eventData.map(monthData => {
           const monthEventData = monthData[eventName];
-          if (monthEventData) {
-            Object.keys(monthEventData).forEach(emotion => {
-              acc[emotion] = (acc[emotion] || 0) + monthEventData[emotion];
-            });
+          const monthName = monthData.month;
+          // If there's no data for the event in this month, return an empty object for this month
+          if (!monthEventData) {
+            return { [monthName]: {} };
           }
-          return acc;
-        }, {});
   
-        return JSON.stringify({
-          event: eventName,
-          month: "All Months",
-          user_emotions: aggregatedData
+          return { [monthName]: monthEventData };
         });
+  
+        return JSON.stringify(monthlyEmotionsData);
       default:
         return '';
     }
   };
+  
   
 
 
@@ -120,42 +119,75 @@ export default function InsightsComponent() {
   };
 
   const renderResponse = (response) => {
-    if (typeof response !== 'object') {
-      try {
-        response = JSON.parse(response);
-      } catch (e) {
-        console.error("Couldn't parse the response as JSON:", e);
-        return <Typography variant="body1">{response}</Typography>;
-      }
+    let responseData;
+  
+    try {
+      responseData = JSON.parse(response);
+    } catch (e) {
+      console.error("Couldn't parse the response as JSON:", e);
+      return <Typography variant="body1">{response}</Typography>;
     }
   
     return (
       <Paper elevation={2} sx={{ p: 2, mb: 1, bgcolor: 'grey.200' }}>
-        {Object.entries(response).map(([key, value], index) => (
-          <Box key={key} sx={{ mb: 2 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-              {key.charAt(0).toUpperCase() + key.slice(1)}:
-            </Typography>
-            {typeof value === 'object' ? (
-              <Paper elevation={0} sx={{ p: 2, bgcolor: 'common.white' }}>
-                {Object.entries(value).map(([innerKey, innerValue], idx) => (
-                  <Typography key={innerKey} variant="body1" sx={{ color: 'text.secondary' }}>
-                    {innerKey.charAt(0).toUpperCase() + innerKey.slice(1)}: {innerValue}
-                  </Typography>
-                ))}
-              </Paper>
-            ) : (
-              <Paper elevation={0} sx={{ p: 2, bgcolor: 'common.white' }}>
-                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                  {value}
+        {Object.entries(responseData).map(([key, value], index) => {
+          // Convert object keys like "Emotions_Per_Month" to a more readable format
+          let formattedKey = key.replace(/_/g, ' ').replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+          
+          // Check if the value is an object and not an array (arrays are also objects in JavaScript)
+          if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+            // It's an object, so we need to render its entries
+            return (
+              <Box key={index} sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  {formattedKey}:
                 </Typography>
-              </Paper>
-            )}
-          </Box>
-        ))}
+                <Paper elevation={0} sx={{ p: 2, bgcolor: 'common.white' }}>
+                  {Object.entries(value).map(([subKey, subValue], subIdx) => (
+                    <Typography key={subIdx} variant="body1" sx={{ color: 'text.secondary' }}>
+                      {subKey.charAt(0).toUpperCase() + subKey.slice(1)}: {subValue.toString()}
+                    </Typography>
+                  ))}
+                </Paper>
+              </Box>
+            );
+          } else if (Array.isArray(value)) {
+            // It's an array, so we can render its elements directly
+            return (
+              <Box key={index} sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  {formattedKey}:
+                </Typography>
+                {value.map((item, idx) => (
+                  <Paper key={idx} elevation={0} sx={{ p: 2, bgcolor: 'common.white', mt: idx > 0 ? 1 : 0 }}>
+                    <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                      {item}
+                    </Typography>
+                  </Paper>
+                ))}
+              </Box>
+            );
+          } else {
+            // The value is neither an object nor an array, so we can render it directly
+            return (
+              <Box key={index} sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  {formattedKey}:
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                  {value.toString()}
+                </Typography>
+              </Box>
+            );
+          }
+        })}
       </Paper>
     );
   };
+  
+  
+  
+  
   
 
   return (
@@ -210,13 +242,11 @@ export default function InsightsComponent() {
           )}
   
           <Button variant="contained" onClick={handleGenerateInsights}>Generate Insights</Button>
-          {response && (selectedQuestion === questions[1] || selectedQuestion === questions[2]) ? (
+          {response &&
             <Box sx={{ mt: 2 }}>
               {renderResponse(response)}
             </Box>
-          ) :
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mt: 2 }}>{response}</Typography>
-          }
+                    }
         </CardContent>
       </Card>
     </Container>
