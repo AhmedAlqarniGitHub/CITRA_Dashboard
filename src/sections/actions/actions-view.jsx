@@ -20,10 +20,10 @@ export default function InsightsComponent() {
   const events = Object.keys(completeEventData[0]).filter(key => key !== 'month');
 
   const questions = [
-    "Summarize all-time user emotions in all the event",
-    "Summarize user emotions in a specific month of a specific event",
-    "Overall observations for a specific event",
-    "Recommendations for the organizer team to improve user satisfaction"
+    "Provide a summary of the most common user emotions observed at all events over time",
+    "Detail the user emotions observed during a specific event in a given month",
+    "Offer a comprehensive overview of attendee emotions for a selected event",
+    "Present recommendations to enhance attendee satisfaction based on event data."
   ];
 
   const monthMapping = {
@@ -50,20 +50,21 @@ export default function InsightsComponent() {
 
     switch (questionNumber) {
       case 1:
-        return `Analyze the comprehensive facial emotion detection data across all events and summarize the predominant user emotions observed. Data: ${selectedData}. Please format your response as follows: { "Predominant_Emo­tions": ["Happy", "Surprised"], "Insights": ["Emotion A is predominant due to...", "An unexpected trend is..."] }.`;
+        return `Please analyze the aggregated facial emotion detection data across all events and provide a summary of the predominant emotions that have been observed. Include the data: ${selectedData}. The response should be structured in JSON format with the keys "Predominant_Emotions" and "Insights", for example: { "Predominant_Emotions": ["Happy", "Surprised"], "Insights": ["The most frequent emotion is...", "There was a notable trend..."] }.`;
 
       case 2:
-        return `Given the facial emotion detection data for ${event} in ${month}: ${selectedData}, summarize the predominant user emotions observed. Ensure your answer is in JSON format with the following keys: { "Event": "${event}", "Month": "${month}", "Visitors Emotions": {"Happy": 0, "Neutral": 0}, "Insights": ["Point 1", "Point 2"] }. Example: { "Event": "Music Festival", "Month": "June", "Visitors Emotions": {"Happy": 120, "Neutral": 50}, "Insights": ["Majority of attendees felt happy", "Neutral emotions were primarily due to waiting times."] }.`;
+        return `Examine the facial emotion detection data for ${event} in the month of ${month}: ${selectedData}, and summarize the main emotions detected among attendees. Your summary should be in JSON format with the keys "Event", "Month", "Visitors Emotions", and "Insights". For instance: { "Event": "${event}", "Month": "${month}", "Visitors Emotions": {"Happy": 120, "Neutral": 50}, "Insights": ["The dominant emotion was happiness", "Neutral expressions were largely due to the wait times."] }.`;
 
       case 3:
-        return `Based on the facial emotion detection data for ${event}, analyze the spectrum of emotions exhibited by attendees across all months. Data: ${selectedData}. Organize your insights into JSON format: { "Event": "${event}", "Emotions_Per_Month": {...}, "Insights": ["Point 1", "Point 2", "Point 3"] }. Example: { "Event": "Art Exhibition", "Emotions_Per_Month": {"January": {"Happy": 100, "Sad": 20}, "February": {"Happy": 150, "Sad": 25}}, "Insights": ["Happiness increased in February", "Sadness remained relatively constant", "Suggest more interactive exhibits to boost positive emotions."] }.`;
+        return `Analyze the emotional data for ${event} over all available months. Data: ${selectedData}. Organize your analysis into JSON format, with keys for "Event", "Emotions_Per_Month", and "Insights". For example: { "Event": "${event}", "Emotions_Per_Month": {"January": {"Happy": 100, "Sad": 20}, "February": {"Happy": 150, "Sad": 25}}, "Insights": ["An uptick in happiness was noted in February", "Sadness levels remained fairly consistent", "Interactive exhibits are recommended to further enhance positivity."] }.`;
 
       case 4:
-        return `Based on the analysis of facial emotion detection data, suggest actionable recommendations for event organizers to enhance user satisfaction for ${event}. Consider the data: ${selectedData}. Format your recommendations as follows: { "Event": "${event}", "Recommendations": ["Recommendation 1", "Recommendation 2"] }. Example: { "Event": "Tech Conference", "Recommendations": ["Increase interactive sessions to boost engagement", "Introduce relaxation zones to help attendees recharge."] }. Not you have to answer with the json object only `;
+        return `Review the facial emotion detection data and propose actionable steps that event organizers can take to improve attendee satisfaction at ${event}. The data provided: ${selectedData}, should guide your recommendations. Please respond with a JSON object only, including keys "Event" and "Recommendations", like this: { "Event": "${event}", "Recommendations": ["To foster engagement, add more interactive sessions", "Incorporate relaxation areas to allow attendees to recharge."] }.`;
 
       default:
         return '';
     }
+
   };
 
 
@@ -128,6 +129,14 @@ export default function InsightsComponent() {
 
   const renderResponse = (response) => {
     let responseData;
+    let preJsonText = "";
+
+    // Attempt to isolate the JSON part of the response
+    const jsonStartIndex = response.indexOf('{');
+    if (jsonStartIndex > -1) {
+      preJsonText = response.substring(0, jsonStartIndex);
+      response = response.substring(jsonStartIndex);
+    }
 
     try {
       responseData = JSON.parse(response);
@@ -137,62 +146,109 @@ export default function InsightsComponent() {
     }
 
     return (
-      <Paper elevation={2} sx={{ p: 2, mb: 1, bgcolor: 'grey.200' }}>
-        {Object.entries(responseData).map(([key, value], index) => {
-          // Convert object keys like "Emotions_Per_Month" to a more readable format
-          let formattedKey = key.replace(/_/g, ' ').replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+      <Container>
+        {/* Display prefatory text under "Observations", if any */}
+        {preJsonText && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Observations:</Typography>
+            <Paper elevation={2} sx={{ p: 2, bgcolor: 'common.white' }}>
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{preJsonText}</Typography>
+            </Paper>
+          </Box>
+        )}
 
-          // Check if the value is an object and not an array (arrays are also objects in JavaScript)
-          if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-            // It's an object, so we need to render its entries
-            return (
-              <Box key={index} sx={{ mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                  {formattedKey}:
-                </Typography>
-                <Paper elevation={0} sx={{ p: 2, bgcolor: 'common.white' }}>
-                  {Object.entries(value).map(([subKey, subValue], subIdx) => (
-                    <Typography key={subIdx} variant="body1" sx={{ color: 'text.secondary' }}>
-                      {subKey.charAt(0).toUpperCase() + subKey.slice(1)}: {subValue.toString()}
-                    </Typography>
+        {/* Render the JSON response */}
+        {Object.entries(responseData).map(([key, value], index) => (
+          <Box key={index} sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+              {formatKey(key)}:
+            </Typography>
+            <Paper elevation={2} sx={{ p: 2, bgcolor: 'common.white' }}>
+              {/* Check the value type and render accordingly */}
+              {typeof value === 'object' && !Array.isArray(value) ? (
+                renderObjectValue(value)
+              ) : Array.isArray(value) ? (
+                <ul style={{ padding: 0, listStylePosition: 'inside' }}>
+                  {value.map((item, idx) => (
+                    <li key={idx}>
+                      <Typography variant="body1" sx={{ color: 'text.secondary', display: 'inline' }}>
+                        {item}
+                      </Typography>
+                    </li>
                   ))}
-                </Paper>
-              </Box>
-            );
-          } else if (Array.isArray(value)) {
-            // It's an array, so we can render its elements directly
-            return (
-              <Box key={index} sx={{ mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                  {formattedKey}:
-                </Typography>
-                {value.map((item, idx) => (
-                  <Paper key={idx} elevation={0} sx={{ p: 2, bgcolor: 'common.white', mt: idx > 0 ? 1 : 0 }}>
-                    <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                      {item}
-                    </Typography>
-                  </Paper>
-                ))}
-              </Box>
-            );
-          } else {
-            // The value is neither an object nor an array, so we can render it directly
-            return (
-              <Box key={index} sx={{ mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                  {formattedKey}:
-                </Typography>
+                </ul>
+              ) : (
                 <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                   {value.toString()}
                 </Typography>
-              </Box>
-            );
-          }
-        })}
-      </Paper>
+              )}
+            </Paper>
+          </Box>
+        ))}
+      </Container>
     );
   };
 
+  // Include the helper functions here as before...
+
+
+  // Place helper functions renderKeyValue, formatKey, renderObjectValue, and renderArrayValue here
+
+
+  // Place helper functions renderKeyValue, formatKey, renderObjectValue, and renderArrayValue here
+
+
+  // Helper function to render key-value pairs
+  function renderKeyValue(key, value, index) {
+    const formattedKey = formatKey(key);
+    return (
+      <Box key={index} sx={{ mb: 2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+          {formattedKey}:
+        </Typography>
+        {typeof value === 'object' && !Array.isArray(value) ? (
+          renderObjectValue(value)
+        ) : Array.isArray(value) ? (
+          renderArrayValue(value)
+        ) : (
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+            {value.toString()}
+          </Typography>
+        )}
+      </Box>
+    );
+  }
+
+  // Helper function to format keys
+  function formatKey(key) {
+    return key.replace(/_/g, ' ').replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+  }
+
+  // Helper function to render object values
+  function renderObjectValue(value) {
+    return (
+      <Paper elevation={0} sx={{ p: 2, bgcolor: 'common.white' }}>
+        {Object.entries(value).map(([subKey, subValue], subIdx) => (
+          <Typography key={subIdx} variant="body1" sx={{ color: 'text.secondary' }}>
+            {formatKey(subKey)}: {typeof subValue === 'object' ? JSON.stringify(subValue) : subValue.toString()}
+          </Typography>
+        ))}
+      </Paper>
+    );
+  }
+
+  // Helper function to render array values
+  function renderArrayValue(value) {
+    return (
+      <Paper elevation={0} sx={{ p: 2, bgcolor: 'common.white' }}>
+        {value.map((item, idx) => (
+          <Typography key={idx} variant="body1" sx={{ color: 'text.secondary' }}>
+            {JSON.stringify(item)}
+          </Typography>
+        ))}
+      </Paper>
+    );
+  }
 
 
 
