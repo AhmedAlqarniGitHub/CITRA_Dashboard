@@ -39,7 +39,9 @@ export const visuallyHidden = {
   
   export function applyFilter({ inputData, comparator, filterName }) {
     const stabilizedThis = inputData.map((el, index) => [el, index]);
-  
+  console.log("filted Nmae: ",filterName)
+  console.log("data Nmae: ",inputData)
+
     stabilizedThis.sort((a, b) => {
       const order = comparator(a[0], b[0]);
       if (order !== 0) return order;
@@ -51,7 +53,7 @@ export const visuallyHidden = {
     if (filterName) {
       filteredData = filteredData.filter(
         // Change 'name' to 'eventName' or any other event-related attribute you wish to filter by
-        (event) => event.eventName.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+        (event) => event.name? event.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1:""
       );
     }
   

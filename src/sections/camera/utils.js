@@ -50,10 +50,25 @@ export function applyFilter({ inputData, comparator, filterName, filterFields = 
   if (filterName) {
     filteredData = filteredData.filter(item =>
       filterFields.some(field =>
-        item[field].toString().toLowerCase().includes(filterName.toLowerCase())
+        safeToString(item[field]).toLowerCase().includes(filterName.toLowerCase())
       )
     );
   }
+  
+  function safeToString(value) {
+    // Check if the value is null or undefined
+    if (value == null) return '';
+    
+    // Check if the value has a toString method
+    if (typeof value.toString === 'function') {
+      return value.toString();
+    }
+    
+    // If the value is an object, convert to JSON string; otherwise, return empty string
+    return typeof value === 'object' ? JSON.stringify(value) : '';
+  }
+  
+
 
   return filteredData;
 }
