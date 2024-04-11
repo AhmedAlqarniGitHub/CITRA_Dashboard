@@ -28,6 +28,11 @@ import Scrollbar from 'src/components/scrollbar';
 import EventTableHead from '../event-table-head';
 import EventTableRow from '../event-table-row';
 import EventTableToolbar from '../event-table-toolbar';
+
+import CircularProgress from '@mui/material/CircularProgress';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+
 import TableNoData from '../table-no-data';
 import TableEmptyRows from '../table-empty-rows';
 import { applyFilter, getComparator } from '../utils_event';
@@ -156,7 +161,7 @@ export default function EventPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === "cameras") {
       // For a multi-select, the value is an array
       setNewEvent((prev) => ({
@@ -170,7 +175,7 @@ export default function EventPage() {
       }));
     }
   };
-  
+
 
 
   const handleSubmit = async () => {
@@ -185,7 +190,7 @@ export default function EventPage() {
         status: newEvent.status,
         cameras: newEvent.cameras, // Include the selected cameras
       };
-  
+
       const response = await axios.post(`${apiBaseUrl}/events/register`, eventData);
       handleClose();
       refreshEventList();
@@ -193,7 +198,7 @@ export default function EventPage() {
       console.error('There was an error submitting the form', error);
     }
   };
-  
+
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, dataFiltered.length - page * rowsPerPage);
 
@@ -240,13 +245,19 @@ export default function EventPage() {
                 />
                 <TableBody>
                   {loading ? (
-                    <tr>
-                      <td colSpan={6}>Loading...</td>
-                    </tr>
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <CircularProgress />
+                      </TableCell>
+                    </TableRow>
                   ) : error ? (
-                    <tr>
-                      <td colSpan={6}>Error: {error}</td>
-                    </tr>
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <Typography variant="subtitle1" color="error">
+                          {error}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
                   ) : dataFiltered.length > 0 ? (
                     dataFiltered
                       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -267,9 +278,19 @@ export default function EventPage() {
                         />
                       ))
                   ) : (
-                    <TableNoData query={filterName} />
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <TableNoData query={filterName} />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: 53 * emptyRows }}>
+                      <TableCell colSpan={6} />
+                    </TableRow>
                   )}
                 </TableBody>
+
               </Table>
             </TableContainer>
           </Scrollbar>
