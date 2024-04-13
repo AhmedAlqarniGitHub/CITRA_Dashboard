@@ -83,6 +83,7 @@ export default function AppCurrentVisits({ title, subheader, chart, ...other }) 
       <CardHeader title={title} subheader={subheader} sx={{ mb: 5 }} />
 
       <StyledChart
+        className="pdf-section"
         dir="ltr"
         type="pie"
         series={chartSeries}

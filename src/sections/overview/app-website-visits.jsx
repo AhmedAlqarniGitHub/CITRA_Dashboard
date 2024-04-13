@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -9,14 +9,15 @@ import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import { ChartSelectionsContext } from './chart-selections-context';
 
 import Chart, { useChart } from 'src/components/chart';
 
-export default function AppWebsiteVisits({ title, subheader, chart, ...other }) {
+export default function AppWebsiteVisits({ title, subheader, chart, isGeneratingPDF, ...other }) {
   const { labels, colors, series, options } = chart;
-
-  // Initialize selectedItems with the names of the first three series
-  const [selectedItems, setSelectedItems] = useState(series.slice(0, 3).map((s) => s.name));
+  const { selections } = useContext(ChartSelectionsContext);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [oldSelectedItems, setOldSelectedItems] = useState([]);
 
   // Function to handle selection change
   const handleSelectionChange = (event) => {
@@ -26,6 +27,23 @@ export default function AppWebsiteVisits({ title, subheader, chart, ...other }) 
       setSelectedItems(value);
     }
   };
+
+  useEffect(() => {
+    if (isGeneratingPDF) {
+      setOldSelectedItems(selectedItems);
+      if (selections.appWebsiteVisitsEvents) {
+        setSelectedItems(selections.appWebsiteVisitsEvents);
+      }
+    } else {
+      setSelectedItems(oldSelectedItems);
+    }
+  }, [isGeneratingPDF]);
+
+  // Initialize with context or default values
+  useEffect(() => {
+    setSelectedItems(series.slice(0, 3).map((s) => s.name));
+    setOldSelectedItems(series.slice(0, 3).map((s) => s.name));
+  }, [series]);
 
   // Filter the chart series based on the selected items
   const filteredSeries = series.filter((serie) => selectedItems.includes(serie.name));
@@ -90,6 +108,7 @@ export default function AppWebsiteVisits({ title, subheader, chart, ...other }) 
       </FormControl>
       <Box sx={{ p: 3, pb: 1 }}>
         <Chart
+          className="pdf-section"
           dir="ltr"
           type="line"
           series={filteredSeries}

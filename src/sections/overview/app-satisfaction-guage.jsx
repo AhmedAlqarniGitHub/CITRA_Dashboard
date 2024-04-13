@@ -17,33 +17,46 @@ const AppSatisfactionGauge = ({ title }) => {
   const [selectedSatisfaction, setSelectedSatisfaction] = useState(0);
 
   useEffect(() => {
+    const fetchSatisfactionData = async () => {
+      const user = { id: localStorage.getItem('id') };
+      try {
+        const response = await axios.get(`${apiBaseUrl}/events/satisfaction/${user.id}`);
+        const data = response.data;
 
-    const user = {
-      id: localStorage.getItem('id'),
+        setSatisfactionData(data);
+        // Check local storage for saved selection
+        const storedSelection = JSON.parse(localStorage.getItem('eventSatisfactionEventSelection'));
+        if (storedSelection) {
+          setSelectedEvent(storedSelection);
+          const eventData = data.find((d) => d.eventId === storedSelection);
+          setSelectedSatisfaction(eventData ? eventData.satisfaction : 0);
+        } else if (data.length > 0) {
+          // Use the first event as default
+          setSelectedEvent(data[0].eventId);
+          setSelectedSatisfaction(data[0].satisfaction);
+        }
+      } catch (error) {
+        console.error('Error fetching satisfaction data:', error);
+      }
     };
 
-    axios
-      .get(`${apiBaseUrl}/events/satisfaction/${user.id}`)
-      .then((response) => {
-        setSatisfactionData(response.data);
-        if (response.data.length > 0) {
-          setSelectedEvent(response.data[0].eventId);
-          setSelectedSatisfaction(response.data[0].satisfaction);
-        }
-      })
-      .catch((error) => console.error('Error fetching satisfaction data:', error));
+    fetchSatisfactionData();
   }, []);
+
+  useEffect(() => {
+    // Update satisfaction value when selected event changes
+    const eventData = satisfactionData.find((d) => d.eventId === selectedEvent);
+    setSelectedSatisfaction(eventData ? eventData.satisfaction : 0);
+  }, [selectedEvent, satisfactionData]);
 
   const handleEventChange = (event) => {
     setSelectedEvent(event.target.value);
-    const eventData = satisfactionData.find((data) => data.eventId === event.target.value);
-    setSelectedSatisfaction(eventData ? eventData.satisfaction : 0);
   };
 
   return (
     <Card style={{ height: '100%' }}>
       <CardHeader title={title} />
-      <div style={{ padding: '20px' , paddingTop:"2.5vh"}} >
+      <div style={{ padding: '20px', paddingTop: '2.5vh' }}>
         <Select
           value={selectedEvent}
           onChange={handleEventChange}
@@ -57,7 +70,10 @@ const AppSatisfactionGauge = ({ title }) => {
             </MenuItem>
           ))}
         </Select>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2 }}>
+        <Box
+          className="pdf-section"
+          sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2 }}
+        >
           <GaugeChart
             id="gauge-chart"
             nrOfLevels={20}

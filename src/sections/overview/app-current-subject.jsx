@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -10,6 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Box from '@mui/material/Box';
+import { ChartSelectionsContext } from './chart-selections-context';
 
 import Chart, { useChart } from 'src/components/chart';
 
@@ -28,23 +29,37 @@ const StyledChart = styled(Chart)(({ theme }) => ({
   },
 }));
 
-export default function AppCurrentSubject({ title, subheader, chart, ...other }) {
+export default function AppCurrentSubject({ title, subheader, chart, isGeneratingPDF, ...other }) {
   const theme = useTheme();
   const { series, colors, categories, options } = chart;
+  const { selections } = useContext(ChartSelectionsContext);
 
-  // State to track selected series
-  const [selectedSeries, setSelectedSeries] = useState(series.slice(0, 3).map((s) => s.name));
+  const [selectedSeries, setSelectedSeries] = useState([]);
+  const [oldSelectedSeries, setOldSelectedSeries] = useState([]);
 
-  // Function to handle series selection change
+  useEffect(() => {
+    if (isGeneratingPDF) {
+      setOldSelectedSeries(selectedSeries);
+      setSelectedSeries(selections.emotionsMapEvents);
+    } else {
+      setSelectedSeries(oldSelectedSeries);
+    }
+  }, [isGeneratingPDF, selections]);
+
+  useEffect(() => {
+    if (!isGeneratingPDF) {
+      setSelectedSeries(chart.series.slice(0, 3).map((s) => s.name)); // Default
+      setOldSelectedSeries(chart.series.slice(0, 3).map((s) => s.name)); // Store default in oldSelectedSeries as well
+    }
+  }, [chart.series, isGeneratingPDF]);
+
   const handleSeriesChange = (event) => {
     const value = event.target.value;
-    // Limit the number of selected series to 3
     if (value.length <= 3) {
       setSelectedSeries(value);
     }
   };
 
-  // Filter the chart series based on the selected series
   const filteredSeries = series.filter((serie) => selectedSeries.includes(serie.name));
 
   const chartOptions = useChart({
@@ -96,6 +111,7 @@ export default function AppCurrentSubject({ title, subheader, chart, ...other })
       </Box>
 
       <StyledChart
+        className="pdf-section"
         dir="ltr"
         type="radar"
         series={filteredSeries}
