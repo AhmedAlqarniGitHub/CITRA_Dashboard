@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LineChart,
   Line,
@@ -40,8 +40,25 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
 
 const InteractiveLineChart = ({ title, subheader, completeEventData, events, emotions }) => {
   // Initialize with the first three or fewer items
-  const [selectedEmotions, setSelectedEmotions] = useState(emotions.slice(0, 3));
-  const [selectedEvents, setSelectedEvents] = useState(events.slice(0, 3));
+ const [selectedEmotions, setSelectedEmotions] = useState([]);
+ const [selectedEvents, setSelectedEvents] = useState([]);
+
+ useEffect(() => {
+   const storedEventsSelections = JSON.parse(
+     localStorage.getItem('eventEmotionAnalysisEventsSelections')
+   );
+   const storedEmotionsSelections = JSON.parse(
+     localStorage.getItem('eventEmotionAnalysisEmotionsSelections')
+   );
+   if (storedEventsSelections && storedEmotionsSelections) {
+     setSelectedEvents(storedEventsSelections);
+     setSelectedEmotions(storedEmotionsSelections);
+   } else {
+     setSelectedEvents(events.slice(0, 3));
+     setSelectedEmotions(emotions.slice(0, 3)); // Default
+   }
+ }, [events, emotions]);
+
 
   // Event handler for emotion selection
   const handleEmotionChange = (event) => {
@@ -73,7 +90,7 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
   return (
     <Card style={{ height: '100%' }}>
       <CardHeader title={title} subheader={subheader} />
-      <ResponsiveContainer width="95%" height={400}>
+      <ResponsiveContainer className="pdf-section" width="95%" height={400}>
         <LineChart data={transformedData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
@@ -84,7 +101,7 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
         </LineChart>
       </ResponsiveContainer>
       <CardContent>
-        <Box display="flex" justifyContent="center" flexWrap="wrap">
+        <Box display="flex" justifyContent="center" flexWrap="wrap-reverse">
           <StyledFormControl variant="outlined">
             <InputLabel id="emotion-label">Emotion</InputLabel>
             <Select

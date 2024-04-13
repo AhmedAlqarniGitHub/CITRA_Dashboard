@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 import { AppView } from 'src/sections/overview/view';
-
+import { ChartSelectionsProvider } from 'src/sections/overview/chart-selections-context'
 // ----------------------------------------------------------------------
 
 export default function AppPage() {
@@ -11,7 +11,9 @@ export default function AppPage() {
         <title> CITRA Dashboard</title>
       </Helmet>
 
-      <AppView />
+      <ChartSelectionsProvider>
+        <AppView />
+      </ChartSelectionsProvider>
     </>
   );
 }

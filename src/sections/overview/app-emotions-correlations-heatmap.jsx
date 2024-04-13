@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Card,
   CardHeader,
@@ -10,10 +10,17 @@ import {
   Box,
 } from '@mui/material';
 import HeatMap from 'react-heatmap-grid';
+import { ChartSelectionsContext } from './chart-selections-context';
 
-const AppEmotionCorrelationHeatmap = ({ emotionCorrelationHeatmapData, events }) => {
+const AppEmotionCorrelationHeatmap = ({
+  emotionCorrelationHeatmapData,
+  events,
+  isGeneratingPDF,
+}) => {
+  const { selections } = useContext(ChartSelectionsContext);
   const [selectedEvent, setSelectedEvent] = useState(events.length > 0 ? events[0] : '');
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Defaults to the current month
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [oldSelections, setOldSelections] = useState({ event: '', month: '' });
 
   const months = [
     'January',
@@ -34,19 +41,33 @@ const AppEmotionCorrelationHeatmap = ({ emotionCorrelationHeatmapData, events })
   const yLabels = ['Happy', 'Sad', 'Neutral', 'Angry', 'Surprised', 'Disgusted', 'Fearful'];
 
   useEffect(() => {
-    // Auto-select the first event and month when the component is mounted
-    if (events.length > 0) {
+    if (isGeneratingPDF) {
+      setOldSelections({ event: selectedEvent, month: selectedMonth });
+      setSelectedEvent(selections.emotionCorrelationHeatmapEvent || '');
+      setSelectedMonth(selections.emotionCorrelationHeatmapMonth || new Date().getMonth() + 1);
+    } else {
+      setSelectedEvent(oldSelections.event);
+      setSelectedMonth(oldSelections.month);
+    }
+  }, [isGeneratingPDF]);
+
+  useEffect(() => {
+    if (isGeneratingPDF) {
+      setOldSelections({ event: selectedEvent, month: selectedMonth });
+      setSelectedEvent(selections.emotionCorrelationHeatmapEvent || oldSelections.event);
+      setSelectedMonth(selections.emotionCorrelationHeatmapMonth || oldSelections.event);
+    } else {
       setSelectedEvent(events[0]);
       setSelectedMonth(new Date().getMonth() + 1);
     }
   }, [events]);
 
-  const handleEventChange = (event) => {
-    setSelectedEvent(event.target.value);
+  const handleEventChange = (e) => {
+    setSelectedEvent(e.target.value);
   };
 
-  const handleMonthChange = (event) => {
-    setSelectedMonth(event.target.value);
+  const handleMonthChange = (e) => {
+    setSelectedMonth(e.target.value);
   };
 
   const getHeatMapData = () => {
@@ -87,21 +108,23 @@ const AppEmotionCorrelationHeatmap = ({ emotionCorrelationHeatmapData, events })
             </Select>
           </FormControl>
         </Box>
-        <HeatMap
-          xLabels={xLabels}
-          yLabels={yLabels}
-          data={getHeatMapData()}
-          xLabelsLocation={'bottom'}
-          xLabelWidth={100}
-          yLabelWidth={100}
-          yLabelTextAlign={'center'}
-          cellStyle={(background, value, min, max, data, x, y) => ({
-            background: `rgb(20, 115, 150, ${1 - (max - value) / (max - min)})`,
-            fontSize: '15px',
-          })}
-          cellRender={(value) => value && `${value}`}
-          height={50}
-        />
+        <div className="pdf-section">
+          <HeatMap
+            xLabels={xLabels}
+            yLabels={yLabels}
+            data={getHeatMapData()}
+            xLabelsLocation={'bottom'}
+            xLabelWidth={100}
+            yLabelWidth={100}
+            yLabelTextAlign={'center'}
+            cellStyle={(background, value, min, max, data, x, y) => ({
+              background: `rgb(20, 115, 150, ${1 - (max - value) / (max - min)})`,
+              fontSize: '15px',
+            })}
+            cellRender={(value) => value && `${value}`}
+            height={50}
+          />
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
   BarChart,
@@ -19,19 +19,53 @@ import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import Box from '@mui/material/Box';
+import { ChartSelectionsContext } from './chart-selections-context';
 
-const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartSetting }) => {
+const BarChartComponent = ({
+  isGeneratingPDF,
+  title,
+  subheader,
+  dataset,
+  xAxis,
+  series,
+  ...chartSetting
+}) => {
   // Extract event names from dataset
   const eventNames = dataset.map((item) => item.event);
+  const { selections } = useContext(ChartSelectionsContext);
 
   // State for selected events
-  const [selectedEvents, setSelectedEvents] = useState([]);
+  const [selectedEvents, setSelectedEvents] = useState(eventNames.slice(0, 3));
+  const [oldSelectedEvents, setOldSelectedEvents] = useState(eventNames.slice(0, 3));
+
+  // Extract event names from dataset and set initial selected events
+  useEffect(() => {
+    if (isGeneratingPDF) {
+      setOldSelectedEvents(selectedEvents);
+      setSelectedEvents(selections.emotionDistributionEvents);
+    } else {
+      setSelectedEvents(oldSelectedEvents);
+    }
+  }, [isGeneratingPDF]);
+
+  // Extract event names from dataset and set initial selected events
+  // useEffect(() => {
+  //   const eventNames = dataset.map((item) => item.event);
+  //   if (isGeneratingPDF) {
+  //     setOldSelectedEvents(eventNames.slice(0, 3));
+  //     setSelectedEvents(selections.emotionDistributionEvents || eventNames.slice(0, 3));
+  //   } else {
+  //     setSelectedEvents(eventNames.slice(0, 3));
+  //     setOldSelectedEvents(eventNames.slice(0, 3));
+  //   }
+  // }, []);
 
   // Extract event names from dataset and set initial selected events
   useEffect(() => {
     const eventNames = dataset.map((item) => item.event);
     setSelectedEvents(eventNames.slice(0, 3));
-  }, [dataset]); // Only re-run when dataset changes
+    setOldSelectedEvents(eventNames.slice(0, 3));
+  }, [dataset]);
 
   const handleEventChange = (event) => {
     const value = event.target.value;
@@ -42,9 +76,7 @@ const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartS
   };
 
   // Filter the dataset based on selected events
-  const filteredDataset = dataset.filter((item) => {
-    return selectedEvents.includes(item.event);
-  });
+  const filteredDataset = dataset.filter((item) => selectedEvents.includes(item.event));
 
   return (
     <Card style={{ height: '100%' }}>
@@ -68,8 +100,13 @@ const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartS
           </Select>
         </FormControl>
       </Box>
-      <ResponsiveContainer width="95%" height="66%">
-        <BarChart data={filteredDataset} layout="vertical" {...chartSetting}>
+      <ResponsiveContainer className="pdf-section" width="95%" height="66%">
+        <BarChart
+          // className="pdf-section"
+          data={filteredDataset}
+          layout="vertical"
+          {...chartSetting}
+        >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" />
           <YAxis type="category" dataKey={xAxis.dataKey} width={120} />
@@ -85,7 +122,7 @@ const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartS
 };
 
 BarChartComponent.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.string.isRequired,
   subheader: PropTypes.string,
   dataset: PropTypes.arrayOf(PropTypes.object).isRequired,
   xAxis: PropTypes.shape({

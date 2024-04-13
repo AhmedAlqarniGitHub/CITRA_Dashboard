@@ -28,6 +28,7 @@ export default function InsightsComponent() {
 
     try {
       const res = await axios.post(`${apiBaseUrl}/actions/generate-text`, { prompt });
+      console.log(res.data);
       setResponse(res.data); // Assuming the response structure
     } catch (error) {
       console.error('Error generating insights:', error);
