@@ -10,6 +10,8 @@ import AppCurrentSubject from '../app-current-subject';
 import InteractiveLineChart from '../app-line-chart';
 import AppOrderTimeline from '../app-order-timeline';
 import AppSatisfactionGauge from '../app-satisfaction-guage';
+import Iconify from 'src/components/iconify';
+import Box from '@mui/material/Box';
 import AppEmotionCorrelationHeatmap from '../app-emotions-correlations-heatmap';
 import SelectionModal from '../selection-modal';
 import Button from '@mui/material/Button'; // Add this line
@@ -83,8 +85,8 @@ export default function AppView() {
         const fetchedEmotions =
           response.data.eventsBarChart.length > 0
             ? Object.keys(response.data.eventsBarChart[0])
-                .filter((key) => key !== 'event')
-                .map((e) => e.toLowerCase())
+              .filter((key) => key !== 'event')
+              .map((e) => e.toLowerCase())
             : [];
 
         setEvents(fetchedEvents);
@@ -676,7 +678,22 @@ export default function AppView() {
         onSelectionChange={handleSelectionChange}
       />
 
-      <Button onClick={handleGeneratePDF}>Generate PDF</Button>
+      <Box display="flex" justifyContent="center" my={2}>
+        <Button
+          variant="contained"
+          startIcon={<Iconify icon="mdi:file-pdf-box" />}
+          onClick={handleGeneratePDF}
+          sx={{
+            bgcolor: 'primary.main',
+            '&:hover': {
+              bgcolor: 'primary.dark',
+            },
+          }}
+        >
+          Generate PDF
+        </Button>
+      </Box>
+
     </Container>
   );
 }
