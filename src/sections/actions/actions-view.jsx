@@ -131,12 +131,13 @@ export default function InsightsComponent() {
     let responseData;
     let preJsonText = "";
 
-    // Attempt to isolate the JSON part of the response
-    const jsonStartIndex = response.indexOf('{');
-    if (jsonStartIndex > -1) {
-      preJsonText = response.substring(0, jsonStartIndex);
-      response = response.substring(jsonStartIndex);
-    }
+     // Attempt to isolate the JSON part of the response
+     const jsonStartIndex = response.indexOf('{');
+     const jsonEndIndex = response.lastIndexOf('}') + 1; // +1 to include the closing bracket
+     if (jsonStartIndex > -1 && jsonEndIndex > jsonStartIndex) {
+         preJsonText = response.substring(0, jsonStartIndex);
+         response = response.substring(jsonStartIndex, jsonEndIndex); // Isolate the JSON part
+     }
 
     try {
       responseData = JSON.parse(response);
