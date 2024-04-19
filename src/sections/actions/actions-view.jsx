@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Container, Typography, Button, MenuItem, FormControl, InputLabel, Select, Card, CardContent, Box,
   CircularProgress, Paper
 } from '@mui/material';
+
 import completeEventData from "../../_mock/event_barChart_cont";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -13,11 +14,12 @@ export default function InsightsComponent() {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedEvent, setSelectedEvent] = useState('');
   const [response, setResponse] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // New state for tracking loading status
+  const [isLoading, setIsLoading] = useState(false);
+  const [completeEventData, setCompleteEventData] = useState([]);
+  const [events, setEvents] = useState([]);
 
 
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  const events = Object.keys(completeEventData[0]).filter(key => key !== 'month');
 
   const questions = [
     "Provide a summary of the most common user emotions observed at all events over time",
@@ -41,6 +43,25 @@ export default function InsightsComponent() {
     "December": "Dec"
   };
 
+  useEffect(() => {
+    fetchEventData();
+  }, []);
+
+  const fetchEventData = async () => {
+    setIsLoading(true);
+    const userId = localStorage.getItem('id');
+
+    try {
+      const response = await axios.get(`${apiBaseUrl}/events/chatgpt/${userId}`);
+      setCompleteEventData(response.data);
+      console.log(response.data)
+      setEvents(Object.keys(response.data[0]).filter(key => key !== 'month'));
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching event data:', error);
+      setIsLoading(false);
+    }
+  };
 
   const generatePrompt = (question, event, month) => {
     console.log("Month: ", month, "Event: ", event);
