@@ -111,11 +111,17 @@ export default function LoginView() {
 
           <Stack spacing={3}>
             <TextField
-              fullWidth
               name="email"
               label="Email address"
               onChange={handleChange}
               value={loginInfo.email}
+              sx={{
+                '& .MuiInputBase-root': {
+                  '&.Mui-filled': {
+                    backgroundColor: 'none'  // Set the desired background color here
+                  }
+                }
+              }}
             />
 
             <TextField
@@ -133,6 +139,13 @@ export default function LoginView() {
                     </IconButton>
                   </InputAdornment>
                 ),
+              }}
+              sx={{
+                '& .MuiInputBase-root': {
+                  '&.Mui-filled': {
+                    backgroundColor: 'white'  // Set the desired background color here
+                  }
+                }
               }}
             />
 

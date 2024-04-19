@@ -156,6 +156,7 @@ export default function EventPage() {
     setOpen(false);
   };
 
+  const isDarkMode = localStorage.getItem('themeMode') === 'dark';
 
 
 
@@ -306,11 +307,14 @@ export default function EventPage() {
           />
         </Card>
       </Container>
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={open} onClose={handleClose}  sx={{
+        '& .MuiDialog-paper': {
+          boxShadow: isDarkMode ? 'none' : undefined,  // Conditionally apply boxShadow
+        },
+      }}>
         <DialogTitle>Add New Event</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
             margin="dense"
             name="eventName"
             label="Event Name"

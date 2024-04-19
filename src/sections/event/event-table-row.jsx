@@ -265,7 +265,7 @@ export default function EventTableRow({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
-          <Button onClick={handleDelete} color="primary" autoFocus>
+          <Button onClick={handleDelete} color="primary" >
             Delete
           </Button>
         </DialogActions>

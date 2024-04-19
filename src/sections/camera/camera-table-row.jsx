@@ -239,7 +239,7 @@ export default function CameraTableRow({
         <DialogContent>Are you sure you want to delete this camera?</DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
-          <Button onClick={handleDelete} autoFocus>Delete</Button>
+          <Button onClick={handleDelete} >Delete</Button>
         </DialogActions>
       </Dialog>
     </>

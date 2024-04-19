@@ -63,6 +63,8 @@ export default function CameraPage() {
 
   const [cameras, setCameras] = useState([]);
 
+  const isDarkMode = localStorage.getItem('themeMode') === 'dark';
+
   useEffect(() => {
     refreshCameraList();
   }, []);
@@ -242,11 +244,16 @@ export default function CameraPage() {
         />
       </Card>
 
-      <Dialog open={openCameraDialog} onClose={handleCameraDialogClose}>
+      <Dialog open={openCameraDialog} onClose={handleCameraDialogClose}  sx={{
+        '& .MuiDialog-paper': {
+          boxShadow: isDarkMode ? 'none' : undefined,  // Conditionally apply boxShadow
+        },
+      }}
+    >
         <DialogTitle>Add New Camera</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
+            
             margin="dense"
             name="manufacturer"
             label="Manufacturer"

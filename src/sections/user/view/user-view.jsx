@@ -56,6 +56,10 @@ export default function UserPage() {
     refreshUserList();
   }, []);
 
+
+  const isDarkMode = localStorage.getItem('themeMode') === 'dark';
+
+
   const refreshUserList = () => {
     let user = {
       id: localStorage.getItem('id'),
@@ -213,7 +217,12 @@ export default function UserPage() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
-      <Dialog open={openUserDialog} onClose={handleUserDialogClose}>
+      <Dialog open={openUserDialog} onClose={handleUserDialogClose}    sx={{
+        '& .MuiDialog-paper': {
+          boxShadow: isDarkMode ? 'none' : undefined,  // Conditionally apply boxShadow
+        },
+      }}
+    >
         <DialogTitle>Add New User</DialogTitle>
         <DialogContent>
           {/* Avatar Selection Button */}
@@ -228,7 +237,7 @@ export default function UserPage() {
 
           {/* User Information Fields */}
           <TextField
-            autoFocus
+            
             margin="dense"
             name="name"
             label="Full Name"
