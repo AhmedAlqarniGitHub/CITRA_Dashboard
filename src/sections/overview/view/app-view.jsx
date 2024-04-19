@@ -3,7 +3,7 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import AppWidgetSummary from '../app-widget-summary';
-import AppWebsiteVisits from '../app-website-visits';
+import EmotionsPerEvent from '../app-website-visits';
 import AppCurrentVisits from '../app-current-visits';
 import BarChartComponent from '../app-bar-chart';
 import AppCurrentSubject from '../app-current-subject';
@@ -144,8 +144,7 @@ export default function AppView() {
 
   const handleModalSave = async (newSelections) => {
     await updateSelections(newSelections);
-    console.log('from context: ', selections);
-    console.log('from newSelections: ', newSelections);
+
     // Close the modal
     setModalOpen(false);
     setIsGeneratingPDF(true); // Set this flag to true when PDF generation starts
@@ -592,7 +591,7 @@ export default function AppView() {
           {/* Charts */}
           {appWebsiteVisitsData.chart && (
             <Grid item xs={12} md={6} lg={8} style={chartStyle}>
-              <AppWebsiteVisits
+              <EmotionsPerEvent
                 title="Emotions per Event"
                 subheader={appWebsiteVisitsData.subheader}
                 chart={appWebsiteVisitsData.chart}

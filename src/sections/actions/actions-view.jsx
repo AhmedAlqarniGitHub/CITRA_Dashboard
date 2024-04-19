@@ -54,7 +54,6 @@ export default function InsightsComponent() {
     try {
       const response = await axios.get(`${apiBaseUrl}/events/chatgpt/${userId}`);
       setCompleteEventData(response.data);
-      console.log(response.data)
       setEvents(Object.keys(response.data[0]).filter(key => key !== 'month'));
       setIsLoading(false);
     } catch (error) {

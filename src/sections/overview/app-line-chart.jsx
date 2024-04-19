@@ -107,6 +107,7 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
             <Select
               labelId="emotion-label"
               multiple
+              label="Emotion"
               value={selectedEmotions}
               onChange={handleEmotionChange}
               renderValue={(selected) => selected.join(', ')}
@@ -124,6 +125,7 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
             <Select
               labelId="event-label"
               multiple
+              label="Event"
               value={selectedEvents}
               onChange={handleEventChange}
               renderValue={(selected) => selected.join(', ')}

@@ -87,6 +87,7 @@ const BarChartComponent = ({
           <Select
             labelId="event-select-label"
             multiple
+            label="elect Events"
             value={selectedEvents}
             onChange={handleEventChange}
             renderValue={(selected) => selected.join(', ')}

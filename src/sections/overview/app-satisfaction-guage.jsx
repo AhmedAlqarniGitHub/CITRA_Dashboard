@@ -7,6 +7,8 @@ import GaugeChart from 'react-gauge-chart'; // Reusing GaugeChart
 import Box from '@mui/material/Box';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 import axios from 'axios';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -56,29 +58,27 @@ const AppSatisfactionGauge = ({ title }) => {
   return (
     <Card style={{ height: '100%' }}>
       <CardHeader title={title} />
-      <div style={{ padding: '20px', paddingTop: '2.5vh' }}>
-        <Select
-          value={selectedEvent}
-          onChange={handleEventChange}
-          displayEmpty
-          fullWidth
-          inputProps={{ 'aria-label': 'Select Event' }}
-        >
-          {satisfactionData.map((data) => (
-            <MenuItem key={data.eventId} value={data.eventId}>
-              {data.eventName}
-            </MenuItem>
-          ))}
-        </Select>
-        <Box
-          className="pdf-section"
-          sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2 }}
-        >
+      <Box sx={{ p: 2, pt: 2.5 }}>
+        <FormControl fullWidth>
+          <InputLabel id="event-select-label">Event</InputLabel>
+          <Select
+            labelId="event-select-label"
+            value={selectedEvent}
+            label="Event" // This must match the InputLabel text
+            onChange={handleEventChange}
+          >
+            {satisfactionData.map((data) => (
+              <MenuItem key={data.eventId} value={data.eventId}>
+                {data.eventName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2 }}>
           <GaugeChart
             id="gauge-chart"
             nrOfLevels={20}
             colors={['#FF0000', '#00FF00']}
-            hideText
             needleColor="#032736"
             percent={selectedSatisfaction / 100} // Convert to a value between 0 and 1
             textColor="#000000"
@@ -87,7 +87,7 @@ const AppSatisfactionGauge = ({ title }) => {
             {`${Math.round(selectedSatisfaction)}% Satisfaction`}
           </Typography>
         </Box>
-      </div>
+      </Box>
     </Card>
   );
 };

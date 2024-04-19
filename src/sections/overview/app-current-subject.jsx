@@ -96,6 +96,7 @@ export default function AppCurrentSubject({ title, subheader, chart, isGeneratin
           <Select
             labelId="series-select-label"
             multiple
+            label="Select Series"
             value={selectedSeries}
             onChange={handleSeriesChange}
             renderValue={(selected) => selected.join(', ')}

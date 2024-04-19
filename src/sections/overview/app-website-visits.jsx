@@ -13,7 +13,7 @@ import { ChartSelectionsContext } from './chart-selections-context';
 
 import Chart, { useChart } from 'src/components/chart';
 
-export default function AppWebsiteVisits({ title, subheader, chart, isGeneratingPDF, ...other }) {
+export default function EmotionsPerEvent({ title, subheader, chart, isGeneratingPDF, ...other }) {
   const { labels, colors, series, options } = chart;
   const { selections } = useContext(ChartSelectionsContext);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -93,6 +93,7 @@ export default function AppWebsiteVisits({ title, subheader, chart, isGenerating
         <InputLabel id="multiple-checkbox-label">Select Data</InputLabel>
         <Select
           labelId="multiple-checkbox-label"
+          label="Select Data"
           multiple
           value={selectedItems}
           onChange={handleSelectionChange}
@@ -121,7 +122,7 @@ export default function AppWebsiteVisits({ title, subheader, chart, isGenerating
   );
 }
 
-AppWebsiteVisits.propTypes = {
+EmotionsPerEvent.propTypes = {
   chart: PropTypes.object.isRequired,
   subheader: PropTypes.string,
   title: PropTypes.string,

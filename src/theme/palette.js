@@ -76,16 +76,6 @@ export const common = {
   white: '#FFFFFF',
 };
 
-export const action = {
-  hover: alpha(grey[500], 0.08),
-  selected: alpha(grey[500], 0.16),
-  disabled: alpha(grey[500], 0.8),
-  disabledBackground: alpha(grey[500], 0.24),
-  focus: alpha(grey[500], 0.24),
-  hoverOpacity: 0.08,
-  disabledOpacity: 0.48,
-};
-
 const base = {
   primary,
   secondary,
@@ -96,28 +86,36 @@ const base = {
   grey,
   common,
   divider: alpha(grey[500], 0.2),
-  action,
+  action: {
+    hover: alpha(grey[500], 0.08),
+    selected: alpha(grey[500], 0.16),
+    disabled: alpha(grey[500], 0.8),
+    disabledBackground: alpha(grey[500], 0.24),
+    focus: alpha(grey[500], 0.24),
+    hoverOpacity: 0.08,
+    disabledOpacity: 0.48,
+  },
 };
 
-// ----------------------------------------------------------------------
-
-export function palette() {
+// Function to return palette settings based on mode
+export function palette(mode = 'light') {
   return {
     ...base,
-    mode: 'light',
+    mode,
     text: {
-      primary: grey[800],
-      secondary: grey[600],
+      primary: mode === 'dark' ? grey[100] : grey[800],
+      secondary: mode === 'dark' ? grey[200] : grey[600],
       disabled: grey[500],
     },
     background: {
-      paper: '#FFFFFF',
-      default: grey[100],
-      neutral: grey[200],
+      paper: mode === 'dark' ? grey[800] : '#FFFFFF',
+      default: mode === 'dark' ? grey[900] : grey[100],
+      neutral: mode === 'dark' ? grey[800] : grey[200],
     },
     action: {
       ...base.action,
-      active: grey[600],
+      active: mode === 'dark' ? grey[300] : grey[600],
     },
   };
 }
+
