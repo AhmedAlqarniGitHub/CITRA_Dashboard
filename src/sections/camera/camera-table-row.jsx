@@ -64,7 +64,7 @@ export default function CameraTableRow({
       console.error('Error fetching events:', error);
     }
   };
-  
+
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -106,7 +106,7 @@ export default function CameraTableRow({
       console.error('Error saving edited camera:', error);
     }
   };
-  
+
 
 
   const handleDeleteClick = () => {
@@ -151,16 +151,16 @@ export default function CameraTableRow({
         {isEditMode ? (
           <>
             <TableCell>
-            <Typography variant="subtitle2" noWrap>
+              <Typography variant="subtitle2" noWrap>
 
-              <TextField value={editedCamera.model} onChange={handleChange('model')} fullWidth />
+                <TextField value={editedCamera.model} onChange={handleChange('model')} fullWidth />
               </Typography>
 
             </TableCell>
             <TableCell>
               <TextField value={editedCamera.manufacturer} onChange={handleChange('manufacturer')} fullWidth />
             </TableCell>
-          
+
             <TableCell>
               <TextField value={editedCamera.supportedQuality} onChange={handleChange('supportedQuality')} fullWidth />
             </TableCell>
@@ -202,12 +202,12 @@ export default function CameraTableRow({
           </>
         ) : (
           <>
-<TableCell>
-  <Typography variant="subtitle2" noWrap sx={{ fontWeight: 'bold' }}>
-    {model}
-  </Typography>
-</TableCell>            <TableCell>{manufacturer}</TableCell>
-          
+            <TableCell>
+              <Typography variant="subtitle2" noWrap sx={{ fontWeight: 'bold' }}>
+                {model}
+              </Typography>
+            </TableCell>            <TableCell>{manufacturer}</TableCell>
+
             <TableCell>{supportedQuality}</TableCell>
             <TableCell>{framesPerSecond}</TableCell>
             <TableCell>

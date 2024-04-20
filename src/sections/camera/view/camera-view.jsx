@@ -156,7 +156,7 @@ export default function CameraPage() {
     inputData: cameras,
     comparator: getComparator(order, orderBy),
     filterName,
-    filterFields: ['manufacturer', 'model', 'supportedQuality', 'framesPerSecond'], // Specify searchable fields
+    filterFields: ['manufacturer', 'model', 'eventName'], // Specify searchable fields
   });
 
   const notFound = !dataFiltered.length && !!filterName;
