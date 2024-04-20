@@ -1,5 +1,3 @@
-// AppOrderTimeline.js
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import Card from '@mui/material/Card';
@@ -11,14 +9,26 @@ import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineItem, { timelineItemClasses } from '@mui/lab/TimelineItem'; // Import timelineItemClasses
-
 import { fDateTime } from 'src/utils/format-time'; // Ensure the path to this utility function is correct
 
-
+// Styling for the card with modern scrollbar
 const cardStyle = {
-  height: '100%', // This can be a specific value or 'auto' for natural height
-  overflow: 'auto' // Add a scrollbar if content overflows
+  height: '100%', // Adjust height as needed
+  overflow: 'auto', // Ensure content is scrollable
+  '&::-webkit-scrollbar': {
+    width: '0.4em'
+  },
+  '&::-webkit-scrollbar-track': {
+    boxShadow: 'inset 0 0 6px rgba(0,0,0,0.1)',
+    webkitBoxShadow: 'inset 0 0 6px rgba(0,0,0,0.1)'
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: 'rgba(0,0,0,.2)',
+    outline: '1px solid slategrey',
+    borderRadius: '10px' // Rounded corners for the scrollbar thumb
+  }
 };
+
 function OrderItem({ item, lastTimeline }) {
   const { title, status, time } = item;
   const type = status === 'Started' ? 'success' : 'error';
@@ -46,7 +56,7 @@ OrderItem.propTypes = {
 
 export default function AppOrderTimeline({ title, subheader, eventsTimeline, ...other }) {
   return (
-    <Card style={cardStyle} {...other}>
+    <Card sx={cardStyle} {...other}>
       <CardHeader title={title} subheader={subheader} />
       <Timeline
         sx={{

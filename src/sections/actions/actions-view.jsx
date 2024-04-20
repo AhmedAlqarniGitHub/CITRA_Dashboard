@@ -248,7 +248,7 @@ export default function InsightsComponent() {
   // Helper function to render object values
   function renderObjectValue(value) {
     return (
-      <Paper elevation={0} sx={{ p: 2, bgcolor: 'common.white' }}>
+      <Paper elevation={0} sx={{ p: 2 }}>
         {Object.entries(value).map(([subKey, subValue], subIdx) => (
           <Typography key={subIdx} variant="body1" sx={{ color: 'text.secondary' }}>
             {formatKey(subKey)}: {typeof subValue === 'object' ? JSON.stringify(subValue) : subValue.toString()}
@@ -261,7 +261,7 @@ export default function InsightsComponent() {
   // Helper function to render array values
   function renderArrayValue(value) {
     return (
-      <Paper elevation={0} sx={{ p: 2, bgcolor: 'common.white' }}>
+      <Paper elevation={0} sx={{ p: 2}}>
         {value.map((item, idx) => (
           <Typography key={idx} variant="body1" sx={{ color: 'text.secondary' }}>
             {JSON.stringify(item)}
