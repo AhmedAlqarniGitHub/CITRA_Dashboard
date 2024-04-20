@@ -92,9 +92,23 @@ export default function CameraTableRow({
   };
 
   const handleChange = (prop) => (event) => {
-    setEditedCamera({ ...editedCamera, [prop]: event.target.value });
-  };
+    const value = event.target.value;
 
+    // If the property being changed is 'status' and the value is either 'maintenance' or 'available', clear the eventId.
+    if (prop === 'status' && (value === 'maintenance' || value === 'available')) {
+      setEditedCamera(prev => ({
+        ...prev,
+        [prop]: value,
+        eventId: '', // Clear the eventId when the status is 'maintenance' or 'available'
+      }));
+    } else {
+      // For all other cases, update normally.
+      setEditedCamera(prev => ({
+        ...prev,
+        [prop]: value,
+      }));
+    }
+  };
   const handleSave = async () => {
     try {
       const userId = localStorage.getItem("id");
@@ -183,7 +197,8 @@ export default function CameraTableRow({
                 <Select
                   value={editedCamera.eventId} // Use eventId for value
                   label="Event"
-                  onChange={(e) => setEditedCamera({ ...editedCamera, eventId: e.target.value })} // Update eventId on change
+                  onChange={handleChange('eventId')} // Update eventId on change
+                  disabled={editedCamera.status !== 'in-use'} // Disable selection if the status is not 'in-use'
                 >
                   {events.map((event) => (
                     <MenuItem key={event._id} value={event._id}>{event.name}</MenuItem> // Use event._id as value
@@ -225,12 +240,12 @@ export default function CameraTableRow({
                   <Iconify icon="eva:edit-fill" width={24} height={24} />
                   Edit
                 </MenuItem>
-                {window.localStorage.getItem("role")=='admin'?
+                {window.localStorage.getItem("role") == 'admin' ?
 
-                <MenuItem onClick={handleDeleteClick}>
-                  <Iconify icon="eva:trash-2-outline" width={24} height={24} />
-                  Delete
-                </MenuItem>:null}
+                  <MenuItem onClick={handleDeleteClick}>
+                    <Iconify icon="eva:trash-2-outline" width={24} height={24} />
+                    Delete
+                  </MenuItem> : null}
               </Menu>
             </TableCell>
           </>
