@@ -43,7 +43,6 @@ export default function UserTableRow({
   };
 
   const handleSave = () => {
-    console.log('Edited name:', editedName);
     setIsEditMode(false);
     // Here you would typically update the state or make an API call to save the changes
   };

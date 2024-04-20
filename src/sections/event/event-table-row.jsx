@@ -134,7 +134,6 @@ export default function EventTableRow({
         id: localStorage.getItem('id'),
       };
       const response = await axios.delete(`${apiBaseUrl}/events/${eventId}/${user.id}`);
-      console.log('Delete response:', response.data);
       refreshEventList();
     } catch (error) {
       console.error('Error deleting event:', error);

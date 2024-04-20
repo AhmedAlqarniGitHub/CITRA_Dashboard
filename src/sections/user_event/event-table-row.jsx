@@ -66,13 +66,11 @@ export default function EventTableRow({
 
   const handleSave = () => {
     // Implement save logic here
-    console.log('Save edited data:', editedEvent);
     setIsEditMode(false);
   };
 
   const handleDelete = () => {
     // Implement delete logic here
-    console.log('Delete:', id);
     handleMenuClose();
   };
 

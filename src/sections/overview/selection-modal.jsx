@@ -52,7 +52,6 @@ function SelectionModal({ open, onClose, onSave, events, emotions, months }) {
   };
 
   const handleSave = () => {
-    console.log(selections)
     onSave(selections);
     onClose();
   };

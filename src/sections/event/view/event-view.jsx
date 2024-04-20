@@ -111,7 +111,6 @@ export default function EventPage() {
     try {
       const userId = localStorage.getItem('id'); // or however you store/retrieve the current user's ID
       const response = await axios.get(`${apiBaseUrl}/cameras/available/${userId}`);
-      console.log(response.data)
       setAvailableCameras(response.data);
     } catch (error) {
       console.error('Error fetching available cameras:', error);

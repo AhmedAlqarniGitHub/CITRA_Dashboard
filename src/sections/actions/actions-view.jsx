@@ -63,7 +63,6 @@ export default function InsightsComponent() {
   };
 
   const generatePrompt = (question, event, month) => {
-    console.log("Month: ", month, "Event: ", event);
     const questionNumber = questions.indexOf(question) + 1;
 
     const selectedData = generatePromptForSpecificMonthAndEvent(completeEventData, selectedEvent, selectedMonth, questionNumber);
@@ -134,10 +133,8 @@ export default function InsightsComponent() {
   const handleGenerateInsights = async () => {
     setIsLoading(true); // Start loading
     const prompt = generatePrompt(selectedQuestion, selectedEvent, selectedMonth);
-    console.log("prompt: " + prompt)
     try {
       const res = await axios.post(`${apiBaseUrl}/actions/generate-text`, { prompt });
-      console.log(res.data);
       setResponse(res.data);
     } catch (error) {
       console.error('Error generating insights:', error);

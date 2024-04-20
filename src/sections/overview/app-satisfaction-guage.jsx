@@ -25,7 +25,6 @@ const AppSatisfactionGauge = ({ title }) => {
         const response = await axios.get(`${apiBaseUrl}/events/satisfaction/${user.id}`);
         const data = response.data;
         // Store data in state
-        console.log(data)
         setSatisfactionData(data);
 
         const storedSelection = localStorage.getItem('eventSatisfactionEventSelection');

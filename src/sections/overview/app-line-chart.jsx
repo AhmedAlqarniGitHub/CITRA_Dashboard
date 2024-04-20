@@ -59,12 +59,10 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
     let count = 0;
     selectedEvents.forEach((event) => {
       if (!monthData[event]) {
-        console.log(`Missing event data for ${event} in month ${monthData.month}`);
         return;
       }
       selectedEmotions.forEach((emotion) => {
         if (monthData[event][emotion] === undefined) {
-          console.log(`Missing emotion data for ${emotion} in event ${event} during ${monthData.month}`);
           return;
         }
         count += monthData[event][emotion] || 0; // Add 0 if the value is undefined
