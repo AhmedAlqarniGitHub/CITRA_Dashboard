@@ -105,16 +105,16 @@ export default function UserTableRow({
 
   const handleDelete = async () => {
     try {
-      let user = {
-        id: localStorage.getItem('id'),
-      };
-      await axios.delete(`${apiBaseUrl}/users/${id}/${user.id}`);
+      const adminId = localStorage.getItem('id'); // Assuming the admin's ID is stored in local storage
+      const response = await axios.delete(`${apiBaseUrl}/users/${id}/${adminId}`); // Pass both the user ID to delete and the admin ID
+      console.log('Delete response:', response.data);
       refreshUserList();
     } catch (error) {
       console.error('Error deleting user:', error);
     }
     setDeleteDialogOpen(false);
   };
+  
 
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);

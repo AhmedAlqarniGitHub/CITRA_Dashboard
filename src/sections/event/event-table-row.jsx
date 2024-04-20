@@ -14,7 +14,7 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
-Typography
+  Typography
 } from '@mui/material';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -205,11 +205,11 @@ export default function EventTableRow({
         </>
       ) : (
         <>
-<TableCell>
-  <Typography variant="subtitle2" noWrap sx={{ fontWeight: 'bold' }}>
-    {eventName}
-  </Typography>
-</TableCell>          <TableCell>{description}</TableCell>
+          <TableCell>
+            <Typography variant="subtitle2" noWrap sx={{ fontWeight: 'bold' }}>
+              {eventName}
+            </Typography>
+          </TableCell>          <TableCell>{description}</TableCell>
           <TableCell>{formatDate(startDate)}</TableCell>
           <TableCell>{formatDate(endDate)}</TableCell>
           <TableCell>{location}</TableCell>

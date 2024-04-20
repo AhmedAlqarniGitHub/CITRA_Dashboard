@@ -132,7 +132,7 @@ export default function UserPage() {
       let user = {
         id: localStorage.getItem('id'),
       };
-      const response = await axios.post(`${apiBaseUrl}/users/register`, userData);
+      const response = await axios.post(`${apiBaseUrl}/users/register`, newUser);
       handleUserDialogClose(); // Close dialog upon successful submission
       refreshUserList(); // Refresh the user list
     } catch (error) {
@@ -199,6 +199,7 @@ export default function UserPage() {
                       description={row.description}
                       avatarUrl={"/assets/images/avatars/"+row.avatarUrl}
                       handleClick={handleClick}
+                      refreshUserList={refreshUserList} // Pass the function here
                     />
                   ))}
                 <TableEmptyRows emptyRows={emptyRows(page, rowsPerPage, users.length)} />
