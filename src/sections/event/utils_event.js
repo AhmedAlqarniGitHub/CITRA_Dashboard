@@ -39,8 +39,7 @@ export const visuallyHidden = {
   
   export function applyFilter({ inputData, comparator, filterName }) {
     const stabilizedThis = inputData.map((el, index) => [el, index]);
-  console.log("filted Nmae: ",filterName)
-  console.log("data Nmae: ",inputData)
+
 
     stabilizedThis.sort((a, b) => {
       const order = comparator(a[0], b[0]);

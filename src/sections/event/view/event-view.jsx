@@ -51,8 +51,10 @@ export default function EventPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [open, setOpen] = useState(false);
   const [availableCameras, setAvailableCameras] = useState([]);
+  const [organizers, setOrganizers] = useState([]);
 
-  const [newEvent, setNewEvent] = useState({
+
+  const initialEventState = {
     organizer: '',
     eventName: '',
     description: '',
@@ -60,8 +62,12 @@ export default function EventPage() {
     endDate: '',
     location: '',
     status: 'active',
-    cameras: [], // This will hold selected camera IDs
-  });
+    cameras: [],
+  };
+
+
+  const [newEvent, setNewEvent] = useState(initialEventState);
+
 
 
   useEffect(() => {
@@ -80,6 +86,8 @@ export default function EventPage() {
       .finally(() => {
         setLoading(false);
       });
+    fetchOrganizers();
+
   }, []);
 
   const refreshEventList = async () => {
@@ -103,9 +111,19 @@ export default function EventPage() {
     try {
       const userId = localStorage.getItem('id'); // or however you store/retrieve the current user's ID
       const response = await axios.get(`${apiBaseUrl}/cameras/available/${userId}`);
+      console.log(response.data)
       setAvailableCameras(response.data);
     } catch (error) {
       console.error('Error fetching available cameras:', error);
+    }
+  };
+
+  const fetchOrganizers = async () => {
+    try {
+      const response = await axios.get(`${apiBaseUrl}/users/all/${localStorage.getItem('id')}`);
+      setOrganizers(response.data);
+    } catch (error) {
+      console.error('Error fetching organizers:', error);
     }
   };
 
@@ -148,6 +166,8 @@ export default function EventPage() {
 
   const handleClickOpen = () => {
     fetchAvailableCameras(); // Fetch cameras when dialog is opened
+    setNewEvent(initialEventState); // Reset the form state
+
     setOpen(true);
   };
 
@@ -187,7 +207,7 @@ export default function EventPage() {
         startingDate: new Date(newEvent.startDate).toISOString(),
         endingDate: new Date(newEvent.endDate).toISOString(),
         description: newEvent.description,
-        organizer: window.localStorage.getItem('id'),
+        organizer: newEvent.organizer,
         status: newEvent.status,
         cameras: newEvent.cameras, // Include the selected cameras
       };
@@ -208,14 +228,17 @@ export default function EventPage() {
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4">Events</Typography>
-          <Button
-            variant="contained"
-            color="inherit"
-            startIcon={<Iconify icon="eva:plus-fill" />}
-            onClick={handleClickOpen}
-          >
-            New Event
-          </Button>
+          {window.localStorage.getItem("role") == 'admin' ?
+            <Button
+              variant="contained"
+              color="inherit"
+              startIcon={<Iconify icon="eva:plus-fill" />}
+              onClick={handleClickOpen}
+            >
+              New Event
+            </Button> : null
+          }
+
         </Stack>
 
         <Card>
@@ -307,7 +330,7 @@ export default function EventPage() {
           />
         </Card>
       </Container>
-      <Dialog open={open} onClose={handleClose}  sx={{
+      <Dialog open={open} onClose={handleClose} sx={{
         '& .MuiDialog-paper': {
           boxShadow: isDarkMode ? 'none' : undefined,  // Conditionally apply boxShadow
         },
@@ -372,6 +395,22 @@ export default function EventPage() {
             value={newEvent.location}
             onChange={handleChange}
           />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Organizer</InputLabel>
+            <Select
+              name="organizer"
+              value={newEvent.organizer}
+              onChange={handleChange}
+              label="Organizer"
+            >
+              {organizers.map(org => (
+                <MenuItem key={org._id} value={org._id}>
+                  {org.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <FormControl fullWidth margin="dense">
             <InputLabel>Available Cameras</InputLabel>
             <Select

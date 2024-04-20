@@ -165,6 +165,7 @@ export default function CameraPage() {
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Cameras</Typography>
+        {window.localStorage.getItem("role")=='admin'?
 
         <Button
           variant="contained"
@@ -173,7 +174,7 @@ export default function CameraPage() {
           onClick={handleCameraDialogOpen}
         >
           New Camera
-        </Button>
+        </Button>:null}
       </Stack>
 
       <Card>

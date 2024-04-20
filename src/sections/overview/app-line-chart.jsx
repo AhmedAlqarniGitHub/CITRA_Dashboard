@@ -77,15 +77,25 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
   };
 
   // Transform the dataset for the selected events and emotions
-  const transformedData = completeEventData.map((monthData) => {
-    let count = 0;
-    selectedEvents.forEach((event) => {
-      selectedEmotions.forEach((emotion) => {
-        count += monthData[event][emotion];
-      });
+  // Transform the dataset for the selected events and emotions
+const transformedData = completeEventData.map((monthData) => {
+  let count = 0;
+  selectedEvents.forEach((event) => {
+    if (!monthData[event]) {
+      console.log(`Missing event data for ${event} in month ${monthData.month}`);
+      return;
+    }
+    selectedEmotions.forEach((emotion) => {
+      if (monthData[event][emotion] === undefined) {
+        console.log(`Missing emotion data for ${emotion} in event ${event} during ${monthData.month}`);
+        return;
+      }
+      count += monthData[event][emotion] || 0; // Add 0 if the value is undefined
     });
-    return { month: monthData.month, count };
   });
+  return { month: monthData.month, count };
+});
+
 
   return (
     <Card style={{ height: '100%' }}>
