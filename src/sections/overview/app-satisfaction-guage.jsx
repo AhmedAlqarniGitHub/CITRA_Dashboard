@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
-import GaugeChart from 'react-gauge-chart'; // Reusing GaugeChart
+import GaugeChart from 'react-gauge-chart';
 import Box from '@mui/material/Box';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -24,16 +24,19 @@ const AppSatisfactionGauge = ({ title }) => {
       try {
         const response = await axios.get(`${apiBaseUrl}/events/satisfaction/${user.id}`);
         const data = response.data;
-
+        // Store data in state
+        console.log(data)
         setSatisfactionData(data);
-        // Check local storage for saved selection
-        const storedSelection = JSON.parse(localStorage.getItem('eventSatisfactionEventSelection'));
-        if (storedSelection) {
-          setSelectedEvent(storedSelection);
-          const eventData = data.find((d) => d.eventId === storedSelection);
+
+        const storedSelection = localStorage.getItem('eventSatisfactionEventSelection');
+        const selected = storedSelection ? JSON.parse(storedSelection) : (data.length > 0 ? data[0].eventId : '');
+
+        if (storedSelection && selected !== selectedEvent) {
+          setSelectedEvent(selected);
+          const eventData = data.find(d => d.eventId === selected);
           setSelectedSatisfaction(eventData ? eventData.satisfaction : 0);
-        } else if (data.length > 0) {
-          // Use the first event as default
+        } else if (!storedSelection && data.length > 0) {
+          // Use the first event as default if no storage and data is available
           setSelectedEvent(data[0].eventId);
           setSelectedSatisfaction(data[0].satisfaction);
         }
@@ -46,13 +49,18 @@ const AppSatisfactionGauge = ({ title }) => {
   }, []);
 
   useEffect(() => {
-    // Update satisfaction value when selected event changes
-    const eventData = satisfactionData.find((d) => d.eventId === selectedEvent);
-    setSelectedSatisfaction(eventData ? eventData.satisfaction : 0);
+    // Only update the satisfaction value if the event data changes
+    const eventData = satisfactionData.find(d => d.eventId === selectedEvent);
+    const newSatisfaction = eventData ? eventData.satisfaction : 0;
+    if (newSatisfaction !== selectedSatisfaction) {
+      setSelectedSatisfaction(newSatisfaction);
+    }
   }, [selectedEvent, satisfactionData]);
 
   const handleEventChange = (event) => {
-    setSelectedEvent(event.target.value);
+    const newEventId = event.target.value;
+    localStorage.setItem('eventSatisfactionEventSelection', JSON.stringify(newEventId));
+    setSelectedEvent(newEventId);
   };
 
   return (
@@ -64,7 +72,7 @@ const AppSatisfactionGauge = ({ title }) => {
           <Select
             labelId="event-select-label"
             value={selectedEvent}
-            label="Event" // This must match the InputLabel text
+            label="Event"
             onChange={handleEventChange}
           >
             {satisfactionData.map((data) => (

@@ -99,6 +99,14 @@ export default function AppView() {
 
     fetchSummaryData();
     fetchChartData();
+     // Set up polling
+     const interval = setInterval(() => {
+      fetchSummaryData();
+      fetchChartData();
+    }, 10000); // Polling every 10 seconds
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(interval);
   }, []);
 
   const {
@@ -137,7 +145,6 @@ export default function AppView() {
 
   // Function to handle selection changes from the modal
   const handleSelectionChange = (newSelections) => {
-    console.log('New selections:', newSelections);
     // Here you can update the state or perform other actions with the new selections
   };
   const { selections, updateSelections } = useContext(ChartSelectionsContext);

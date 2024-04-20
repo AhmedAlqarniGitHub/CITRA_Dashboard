@@ -21,8 +21,18 @@ import ListItemText from '@mui/material/ListItemText';
 import Box from '@mui/material/Box';
 import { ChartSelectionsContext } from './chart-selections-context';
 
+// Define colors for emotions
+const emotionColors = {
+  happy: '#FFD700', // Gold
+  sad: '#1E90FF', // DodgerBlue
+  disgusted: '#008000', // Green
+  surprised: '#FF69B4', // HotPink
+  neutral: '#A52A2A', // Brown
+  fearful: '#800080', // Purple
+  angry: '#FF0000', // Red
+};
+
 const BarChartComponent = ({
-  isGeneratingPDF,
   title,
   subheader,
   dataset,
@@ -30,53 +40,30 @@ const BarChartComponent = ({
   series,
   ...chartSetting
 }) => {
-  // Extract event names from dataset
-  const eventNames = dataset.map((item) => item.event);
+  const eventNames = dataset.map(item => item.event);
   const { selections } = useContext(ChartSelectionsContext);
 
-  // State for selected events
   const [selectedEvents, setSelectedEvents] = useState(eventNames.slice(0, 3));
-  const [oldSelectedEvents, setOldSelectedEvents] = useState(eventNames.slice(0, 3));
 
-  // Extract event names from dataset and set initial selected events
   useEffect(() => {
-    if (isGeneratingPDF) {
-      setOldSelectedEvents(selectedEvents);
-      setSelectedEvents(selections.emotionDistributionEvents);
-    } else {
-      setSelectedEvents(oldSelectedEvents);
-    }
-  }, [isGeneratingPDF]);
-
-  // Extract event names from dataset and set initial selected events
-  // useEffect(() => {
-  //   const eventNames = dataset.map((item) => item.event);
-  //   if (isGeneratingPDF) {
-  //     setOldSelectedEvents(eventNames.slice(0, 3));
-  //     setSelectedEvents(selections.emotionDistributionEvents || eventNames.slice(0, 3));
-  //   } else {
-  //     setSelectedEvents(eventNames.slice(0, 3));
-  //     setOldSelectedEvents(eventNames.slice(0, 3));
-  //   }
-  // }, []);
-
-  // Extract event names from dataset and set initial selected events
-  useEffect(() => {
-    const eventNames = dataset.map((item) => item.event);
+    const eventNames = dataset.map(item => item.event);
     setSelectedEvents(eventNames.slice(0, 3));
-    setOldSelectedEvents(eventNames.slice(0, 3));
   }, [dataset]);
 
   const handleEventChange = (event) => {
     const value = event.target.value;
-    // Limit to a maximum of 3 selected events
     if (value.length <= 3) {
       setSelectedEvents(value);
     }
   };
 
-  // Filter the dataset based on selected events
-  const filteredDataset = dataset.filter((item) => selectedEvents.includes(item.event));
+  const filteredDataset = dataset.filter(item => selectedEvents.includes(item.event));
+
+  // Applying consistent color based on emotion
+  const coloredSeries = series.map(serie => ({
+    ...serie,
+    fill: emotionColors[serie.label] || '#000000', // Default to black if not specified
+  }));
 
   return (
     <Card style={{ height: '100%' }}>
@@ -87,12 +74,12 @@ const BarChartComponent = ({
           <Select
             labelId="event-select-label"
             multiple
-            label="elect Events"
+            label="Select Events"
             value={selectedEvents}
             onChange={handleEventChange}
             renderValue={(selected) => selected.join(', ')}
           >
-            {eventNames.map((event) => (
+            {eventNames.map(event => (
               <MenuItem key={event} value={event}>
                 <Checkbox checked={selectedEvents.includes(event)} />
                 <ListItemText primary={event} />
@@ -103,7 +90,6 @@ const BarChartComponent = ({
       </Box>
       <ResponsiveContainer className="pdf-section" width="95%" height="66%">
         <BarChart
-          // className="pdf-section"
           data={filteredDataset}
           layout="vertical"
           {...chartSetting}
@@ -113,7 +99,7 @@ const BarChartComponent = ({
           <YAxis type="category" dataKey={xAxis.dataKey} width={120} />
           <Tooltip />
           <Legend />
-          {series.map(({ dataKey, label, fill }) => (
+          {coloredSeries.map(({ dataKey, label, fill }) => (
             <Bar key={dataKey} dataKey={dataKey} name={label} fill={fill} />
           ))}
         </BarChart>
@@ -136,7 +122,6 @@ BarChartComponent.propTypes = {
       fill: PropTypes.string,
     })
   ).isRequired,
-  chartSetting: PropTypes.object,
 };
 
 export default BarChartComponent;

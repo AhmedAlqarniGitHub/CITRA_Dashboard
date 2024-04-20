@@ -172,7 +172,7 @@ export default function InsightsComponent() {
         {preJsonText && (
           <Box sx={{ mb: 2 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Observations:</Typography>
-            <Paper elevation={2} sx={{ p: 2, bgcolor: 'common.white' }}>
+            <Paper elevation={2} sx={{ p: 2 }}>
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{preJsonText}</Typography>
             </Paper>
           </Box>
@@ -184,7 +184,7 @@ export default function InsightsComponent() {
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
               {formatKey(key)}:
             </Typography>
-            <Paper elevation={2} sx={{ p: 2, bgcolor: 'common.white' }}>
+            <Paper elevation={2} sx={{ p: 2}}>
               {/* Check the value type and render accordingly */}
               {typeof value === 'object' && !Array.isArray(value) ? (
                 renderObjectValue(value)
