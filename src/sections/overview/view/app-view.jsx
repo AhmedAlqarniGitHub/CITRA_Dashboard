@@ -600,7 +600,7 @@ export default function AppView() {
             <Grid item xs={12} md={6} lg={8} style={chartStyle}>
               <EmotionsPerEvent
                 title="Emotions per Event"
-                subheader={appWebsiteVisitsData.subheader}
+                subheader="Emotions per each event"
                 chart={appWebsiteVisitsData.chart}
                 isGeneratingPDF={isGeneratingPDF}
               />
