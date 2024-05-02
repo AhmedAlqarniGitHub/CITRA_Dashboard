@@ -90,13 +90,21 @@ const AppEmotionCorrelationHeatmap = ({
   };
 
   const getHeatMapData = () => {
-    if (!selectedEvent || !selectedMonth || !emotionCorrelationHeatmapData[selectedEvent]) {
-      return yLabels.map(() => Array(12).fill(0));
+    // Check if data for the selected event and month is available and structured correctly
+    if (!selectedEvent || !selectedMonth || 
+        !emotionCorrelationHeatmapData[selectedEvent] || 
+        !emotionCorrelationHeatmapData[selectedEvent][selectedMonth] ||
+        !Array.isArray(emotionCorrelationHeatmapData[selectedEvent][selectedMonth])) {
+      // Return an array of zeros if data is missing or not an array
+      return yLabels.map(() => Array(xLabels.length).fill(0));
     }
-
-    return yLabels.map((label) =>
+    // Map over the data to create the heatmap data array
+    return yLabels.map(label =>
       emotionCorrelationHeatmapData[selectedEvent][selectedMonth].map(
-        (periodData) => periodData[label.toLowerCase()] || 0
+        (periodData) => {
+          // Safeguard against periodData not being an object or if label does not exist in periodData
+          return (periodData && periodData[label.toLowerCase()]) ? periodData[label.toLowerCase()] : 0;
+        }
       )
     );
   };
