@@ -19,8 +19,29 @@ export const ChartSelectionsProvider = ({ children }) => {
     setSelections(newSelections);
   };
 
+  const [appSelections, setAppSelections] = useState({
+    appBarEvents: [],
+    emotionDistributionEvents: [],
+    eventSatisfactionEvent: '',
+    emotionsMapEvents: [],
+    eventEmotionAnalysisEvents: [],
+    eventEmotionAnalysisEmotions: [],
+    emotionCorrelationHeatmapEvent: '',
+    emotionCorrelationHeatmapMonth: '',
+    appWebsiteVisitsEvents: [],
+    lineChartEvents: [],
+    lineChartEmotions: [],
+  });
+
+  // Function to partially update app selections
+  const updateAppSelections = (newAppSelections) => {
+    setAppSelections((prevAppSelections) => ({ ...prevAppSelections, ...newAppSelections }));
+  };
+
   return (
-    <ChartSelectionsContext.Provider value={{ selections, updateSelections }}>
+    <ChartSelectionsContext.Provider
+      value={{ selections, updateSelections, appSelections, updateAppSelections }}
+    >
       {children}
     </ChartSelectionsContext.Provider>
   );

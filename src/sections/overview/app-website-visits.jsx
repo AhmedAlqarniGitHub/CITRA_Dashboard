@@ -15,7 +15,7 @@ import Chart, { useChart } from 'src/components/chart';
 
 export default function EmotionsPerEvent({ title, subheader, chart, isGeneratingPDF, ...other }) {
   const { labels, colors, series, options } = chart;
-  const { selections } = useContext(ChartSelectionsContext);
+  const { selections, appSelections, updateAppSelections } = useContext(ChartSelectionsContext);
   const [selectedItems, setSelectedItems] = useState([]);
   const [oldSelectedItems, setOldSelectedItems] = useState([]);
 
@@ -24,7 +24,8 @@ export default function EmotionsPerEvent({ title, subheader, chart, isGenerating
     const value = event.target.value;
     // Limit the number of selected items to 3
     if (value.length <= 3) {
-      setSelectedItems(value);
+      updateAppSelections({ appWebsiteVisitsEvents : value});
+      // setSelectedItems(value);
     }
   };
 
@@ -34,15 +35,22 @@ export default function EmotionsPerEvent({ title, subheader, chart, isGenerating
       if (selections.appWebsiteVisitsEvents) {
         setSelectedItems(selections.appWebsiteVisitsEvents);
       }
+    } else if (appSelections.appWebsiteVisitsEvents) {
+      setSelectedItems(appSelections.appWebsiteVisitsEvents);
     } else {
       setSelectedItems(oldSelectedItems);
     }
-  }, [isGeneratingPDF]);
+  }, [isGeneratingPDF, appSelections]);
 
   // Initialize with context or default values
   useEffect(() => {
-    setSelectedItems(series.slice(0, 3).map((s) => s.name));
-    setOldSelectedItems(series.slice(0, 3).map((s) => s.name));
+    if (appSelections.appWebsiteVisitsEvents && appSelections.appWebsiteVisitsEvents.length > 0) {
+      setSelectedItems(appSelections.appWebsiteVisitsEvents);
+    } else {
+      setSelectedItems(series.slice(0, 3).map((s) => s.name));
+      setOldSelectedItems(series.slice(0, 3).map((s) => s.name));
+      updateAppSelections({ appWebsiteVisitsEvents: series.slice(0, 3).map((s) => s.name) });
+    }
   }, [series]);
 
   // Filter the chart series based on the selected items

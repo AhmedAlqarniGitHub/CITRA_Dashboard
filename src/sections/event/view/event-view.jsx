@@ -37,7 +37,7 @@ import TableNoData from '../table-no-data';
 import TableEmptyRows from '../table-empty-rows';
 import { applyFilter, getComparator } from '../utils_event';
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://localhost:3000';
 
 export default function EventPage() {
   const [events, setEvents] = useState([]);

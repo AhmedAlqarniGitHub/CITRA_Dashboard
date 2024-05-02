@@ -7,7 +7,7 @@ import {
 
 import completeEventData from "../../_mock/event_barChart_cont";
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://localhost:3000';
 
 export default function InsightsComponent() {
   const [selectedQuestion, setSelectedQuestion] = useState('');

@@ -1,11 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from 'recharts';
 import {
-  Card, CardHeader, CardContent, FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, Box
+  Card,
+  CardHeader,
+  CardContent,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  ListItemText,
+  Box,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { ChartSelectionsContext } from './chart-selections-context';
 
 // Styled components
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
@@ -25,25 +42,37 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
 const InteractiveLineChart = ({ title, subheader, completeEventData, events, emotions }) => {
   const [selectedEmotions, setSelectedEmotions] = useState([]);
   const [selectedEvents, setSelectedEvents] = useState([]);
+  const { selections, appSelections, updateAppSelections } = useContext(ChartSelectionsContext);
 
   useEffect(() => {
-    const storedEventsSelections = JSON.parse(localStorage.getItem('eventEmotionAnalysisEventsSelections'));
-    const storedEmotionsSelections = JSON.parse(localStorage.getItem('eventEmotionAnalysisEmotionsSelections'));
     const sortedEmotions = [...emotions].sort(); // Sorting emotions alphabetically
-
-    if (storedEventsSelections && storedEmotionsSelections) {
-      setSelectedEvents(storedEventsSelections);
-      setSelectedEmotions(storedEmotionsSelections);
+    if (appSelections.lineChartEvents.length > 0 && appSelections.lineChartEmotions.length > 0) {
+      setSelectedEvents(appSelections.lineChartEvents);
+      setSelectedEmotions(appSelections.lineChartEmotions); // Default
     } else {
       setSelectedEvents(events.slice(0, 3));
       setSelectedEmotions(sortedEmotions.slice(0, 3)); // Default
+      updateAppSelections({
+        lineChartEvents: events.slice(0, 3),
+        lineChartEmotions: sortedEmotions.slice(0, 3),
+      });
     }
   }, [events, emotions]);
+
+  useEffect(() => {
+    if (appSelections.lineChartEvents.length > 0 && appSelections.lineChartEmotions.length > 0) {
+      setSelectedEvents(appSelections.lineChartEvents);
+      setSelectedEmotions(appSelections.lineChartEmotions); // Default
+    }
+  }, [appSelections]);
 
   // Event handler for emotion selection
   const handleEmotionChange = (event) => {
     const value = event.target.value;
     setSelectedEmotions(value);
+    updateAppSelections({
+      lineChartEmotions: value,
+    });
   };
 
   // Event handler for event name selection
@@ -51,6 +80,9 @@ const InteractiveLineChart = ({ title, subheader, completeEventData, events, emo
     const value = event.target.value;
     if (value.length <= 3) {
       setSelectedEvents(value);
+      updateAppSelections({
+        lineChartEvents: value,
+      });
     }
   };
 

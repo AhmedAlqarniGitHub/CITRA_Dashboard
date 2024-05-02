@@ -19,7 +19,7 @@ import {
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import axios from 'axios';
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://localhost:3000';
 
 const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Adjust according to your needs

@@ -32,35 +32,40 @@ const emotionColors = {
   angry: '#FF0000', // Red
 };
 
-const BarChartComponent = ({
-  title,
-  subheader,
-  dataset,
-  xAxis,
-  series,
-  ...chartSetting
-}) => {
-  const eventNames = dataset.map(item => item.event);
-  const { selections } = useContext(ChartSelectionsContext);
+const BarChartComponent = ({ title, subheader, dataset, xAxis, series, ...chartSetting }) => {
+  const eventNames = dataset.map((item) => item.event);
+  const { selections, appSelections, updateAppSelections } = useContext(ChartSelectionsContext);
 
   const [selectedEvents, setSelectedEvents] = useState(eventNames.slice(0, 3));
 
   useEffect(() => {
-    const eventNames = dataset.map(item => item.event);
-    setSelectedEvents(eventNames.slice(0, 3));
+    const eventNames = dataset.map((item) => item.event);
+    if (appSelections?.appBarEvents && appSelections.appBarEvents.length > 0) {
+      setSelectedEvents(appSelections.appBarEvents);
+    } else {
+      setSelectedEvents(eventNames.slice(0, 3));
+      updateAppSelections({ appBarEvents: eventNames.slice(0, 3) });
+    }
   }, [dataset]);
+
+  useEffect(() => {
+    if (appSelections?.appBarEvents) {
+      setSelectedEvents(appSelections.appBarEvents);
+    }
+  }, [appSelections]);
 
   const handleEventChange = (event) => {
     const value = event.target.value;
     if (value.length <= 3) {
-      setSelectedEvents(value);
+      updateAppSelections({ appBarEvents: value });
+      // setSelectedEvents(value);
     }
   };
 
-  const filteredDataset = dataset.filter(item => selectedEvents.includes(item.event));
+  const filteredDataset = dataset.filter((item) => selectedEvents.includes(item.event));
 
   // Applying consistent color based on emotion
-  const coloredSeries = series.map(serie => ({
+  const coloredSeries = series.map((serie) => ({
     ...serie,
     fill: emotionColors[serie.label] || '#000000', // Default to black if not specified
   }));
@@ -79,7 +84,7 @@ const BarChartComponent = ({
             onChange={handleEventChange}
             renderValue={(selected) => selected.join(', ')}
           >
-            {eventNames.map(event => (
+            {eventNames.map((event) => (
               <MenuItem key={event} value={event}>
                 <Checkbox checked={selectedEvents.includes(event)} />
                 <ListItemText primary={event} />
@@ -89,11 +94,7 @@ const BarChartComponent = ({
         </FormControl>
       </Box>
       <ResponsiveContainer className="pdf-section" width="95%" height="66%">
-        <BarChart
-          data={filteredDataset}
-          layout="vertical"
-          {...chartSetting}
-        >
+        <BarChart data={filteredDataset} layout="vertical" {...chartSetting}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" />
           <YAxis type="category" dataKey={xAxis.dataKey} width={120} />

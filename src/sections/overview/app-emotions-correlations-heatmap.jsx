@@ -17,7 +17,7 @@ const AppEmotionCorrelationHeatmap = ({
   events,
   isGeneratingPDF,
 }) => {
-  const { selections } = useContext(ChartSelectionsContext);
+  const { selections, appSelections, updateAppSelections } = useContext(ChartSelectionsContext);
   const [selectedEvent, setSelectedEvent] = useState(events.length > 0 ? events[0] : '');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [oldSelections, setOldSelections] = useState({ event: '', month: '' });
@@ -45,29 +45,48 @@ const AppEmotionCorrelationHeatmap = ({
       setOldSelections({ event: selectedEvent, month: selectedMonth });
       setSelectedEvent(selections.emotionCorrelationHeatmapEvent || '');
       setSelectedMonth(selections.emotionCorrelationHeatmapMonth || new Date().getMonth() + 1);
+    } else if (
+      appSelections.emotionCorrelationHeatmapEvent &&
+      appSelections.emotionCorrelationHeatmapMonth
+    ) {
+      setSelectedEvent(appSelections.emotionCorrelationHeatmapEvent || '');
+      setSelectedMonth(appSelections.emotionCorrelationHeatmapMonth || new Date().getMonth() + 1);
     } else {
       setSelectedEvent(oldSelections.event);
       setSelectedMonth(oldSelections.month);
     }
-  }, [isGeneratingPDF]);
+  }, [isGeneratingPDF, appSelections]);
 
   useEffect(() => {
     if (isGeneratingPDF) {
       setOldSelections({ event: selectedEvent, month: selectedMonth });
       setSelectedEvent(selections.emotionCorrelationHeatmapEvent || oldSelections.event);
       setSelectedMonth(selections.emotionCorrelationHeatmapMonth || oldSelections.event);
+    } else if (
+      appSelections.emotionCorrelationHeatmapEvent &&
+      appSelections.emotionCorrelationHeatmapMonth
+    ) {
+      setSelectedEvent(appSelections.emotionCorrelationHeatmapEvent || '');
+      setSelectedMonth(appSelections.emotionCorrelationHeatmapMonth || new Date().getMonth() + 1);
     } else {
       setSelectedEvent(events[0]);
       setSelectedMonth(new Date().getMonth() + 1);
+      updateAppSelections({
+        emotionCorrelationHeatmapEvent: events[0],
+        emotionCorrelationHeatmapMonth: new Date().getMonth() + 1,
+      });
+
     }
   }, [events]);
 
   const handleEventChange = (e) => {
-    setSelectedEvent(e.target.value);
+    // setSelectedEvent(e.target.value);
+    updateAppSelections({ emotionCorrelationHeatmapEvent: e.target.value });
   };
 
   const handleMonthChange = (e) => {
-    setSelectedMonth(e.target.value);
+    // setSelectedMonth(e.target.value);
+    updateAppSelections({ emotionCorrelationHeatmapMonth: e.target.value });
   };
 
   const getHeatMapData = () => {

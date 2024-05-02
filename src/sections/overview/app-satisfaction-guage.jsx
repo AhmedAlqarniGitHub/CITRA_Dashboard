@@ -11,7 +11,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import axios from 'axios';
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://localhost:3000';
 
 const AppSatisfactionGauge = ({ title }) => {
   const [satisfactionData, setSatisfactionData] = useState([]);
@@ -89,6 +89,7 @@ const AppSatisfactionGauge = ({ title }) => {
             needleColor="#032736"
             percent={selectedSatisfaction / 100} // Convert to a value between 0 and 1
             textColor="#000000"
+            animate={false}
           />
           <Typography variant="h6" component="div" color="text.secondary" sx={{ mt: 1 }}>
             {`${Math.round(selectedSatisfaction)}% Satisfaction`}

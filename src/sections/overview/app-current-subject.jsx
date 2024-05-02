@@ -32,7 +32,7 @@ const StyledChart = styled(Chart)(({ theme }) => ({
 export default function AppCurrentSubject({ title, subheader, chart, isGeneratingPDF, ...other }) {
   const theme = useTheme();
   const { series, colors, categories, options } = chart;
-  const { selections } = useContext(ChartSelectionsContext);
+  const { selections, appSelections, updateAppSelections } = useContext(ChartSelectionsContext);
 
   const [selectedSeries, setSelectedSeries] = useState([]);
   const [oldSelectedSeries, setOldSelectedSeries] = useState([]);
@@ -41,22 +41,28 @@ export default function AppCurrentSubject({ title, subheader, chart, isGeneratin
     if (isGeneratingPDF) {
       setOldSelectedSeries(selectedSeries);
       setSelectedSeries(selections.emotionsMapEvents);
+    } else if (appSelections?.emotionsMapEvents) {
+      setSelectedSeries(appSelections.emotionsMapEvents);
     } else {
       setSelectedSeries(oldSelectedSeries);
     }
-  }, [isGeneratingPDF, selections]);
+  }, [isGeneratingPDF, selections, appSelections]);
 
   useEffect(() => {
-    if (!isGeneratingPDF) {
+    if (appSelections?.emotionsMapEvents && appSelections.emotionsMapEvents.length > 0) {
+      setSelectedSeries(appSelections.emotionsMapEvents);
+    } else if (!isGeneratingPDF) {
       setSelectedSeries(chart.series.slice(0, 3).map((s) => s.name)); // Default
       setOldSelectedSeries(chart.series.slice(0, 3).map((s) => s.name)); // Store default in oldSelectedSeries as well
+      updateAppSelections({ emotionsMapEvents: chart.series.slice(0, 3).map((s) => s.name) });
     }
   }, [chart.series, isGeneratingPDF]);
 
   const handleSeriesChange = (event) => {
     const value = event.target.value;
     if (value.length <= 3) {
-      setSelectedSeries(value);
+      // setSelectedSeries(value);
+      updateAppSelections({ emotionsMapEvents : value});
     }
   };
 

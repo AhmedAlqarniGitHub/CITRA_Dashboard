@@ -18,7 +18,7 @@ import Logo from 'src/components/logo';
 import { bgGradient } from 'src/theme/css';
 
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://localhost:3000';
 
 export default function LoginView() {
   const theme = useTheme();

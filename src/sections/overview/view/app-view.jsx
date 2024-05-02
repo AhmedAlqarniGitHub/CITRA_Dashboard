@@ -22,7 +22,7 @@ import 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 
 import axios from 'axios';
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://localhost:3000';
 
 const chartStyle = {
   height: '580px', // Adjust this value as needed
@@ -147,7 +147,7 @@ export default function AppView() {
   const handleSelectionChange = (newSelections) => {
     // Here you can update the state or perform other actions with the new selections
   };
-  const { selections, updateSelections } = useContext(ChartSelectionsContext);
+  const { selections, updateSelections, appSelections, updateAppSelections } = useContext(ChartSelectionsContext);
 
   const handleModalSave = async (newSelections) => {
     await updateSelections(newSelections);

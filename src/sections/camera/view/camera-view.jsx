@@ -33,7 +33,7 @@ import TableEmptyRows from '../table-empty-rows';
 import CameraTableToolbar from '../camera-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://localhost:3000';
 
 // ----------------------------------------------------------------------
 
@@ -77,6 +77,7 @@ export default function CameraPage() {
       .get(`${apiBaseUrl}/cameras/all/${user.id}`)
       .then((response) => {
         setCameras(response.data);
+        console.log("response of /cameras/all : ",response.data)
       })
       .catch((err) => console.error('Error fetching cameras:', err));
   };
