@@ -469,7 +469,7 @@ export default function AppView() {
         pdf.text(chartTitle, 15, 70);
 
         // Adjust chart height to not exceed 30% of the page height while maintaining the aspect ratio
-        const maxChartHeight = (pageHeight * 30) / 100; // 30% of page height
+        const maxChartHeight = (pageHeight * 35) / 100; // 30% of page height
         const aspectRatio = canvas.width / canvas.height;
         const chartWidth = i < elements.length - 2 ? 180 / aspectRatio : 180; // Fixed chart width
         const chartHeight = Math.min(maxChartHeight, chartWidth / aspectRatio);
